@@ -28,6 +28,4 @@ This case study is part of the university course "Data Visualization and Analysi
 |---------|
 |[Rodrigo Mont'Alegre](https://github.com/[rodrigomontalegre])|
 |[Kader Saygılı](https://github.com/[kadersaygili])|
-|[Rouven Tschersich]|
-|[Yuping Wen]|
 
