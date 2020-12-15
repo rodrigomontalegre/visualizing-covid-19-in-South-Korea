@@ -7,12 +7,17 @@ This case study is part of the university course "Data Visualization and Analysi
 
 ### Methods used
 
-*Data Visualization
-*Inferential Statistics
+* Data Visualization
+* Inferential Statistics
 
 ### Technologies
 
-*R
+* R
+
+## Needs of this project
+- data cleaning
+- data exploration
+- reporting
 
 ## Featured Notebooks and Analyses
 
@@ -23,5 +28,6 @@ This case study is part of the university course "Data Visualization and Analysi
 |---------|
 |[Rodrigo Mont'Alegre](https://github.com/[rodrigomontalegre])|
 |[Kader Saygılı](https://github.com/[kadersaygili])|
-|[Rouven Tschersich]
+|[Rouven Tschersich]|
+|[Yuping Wen]|
 
