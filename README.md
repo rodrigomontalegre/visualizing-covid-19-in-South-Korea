@@ -29,3 +29,16 @@ This case study is part of the university course "Data Visualization and Analysi
 |[Rodrigo Mont'Alegre](https://github.com/[rodrigomontalegre])|
 |[Kader Saygılı](https://github.com/[kadersaygili])|
 
+## Important considerations for the final analysis
+
+- At least three claims were formulated and communicated well
+- All stated claims were supported by appropriate figures (appropriate plot types were used and associative plots supported each claim)
+- Alternative interpretations of the associations were discussed (directionality, effect of a third variable, robustness, etc.)
+- At least two claims were additionally supported by an appropriate statistical test
+- At least one example was shown, where controlling for the effect of a third variable was necessary to support a claim to to invalidate a perviously stated claim
+
+## Additional considerations for the Rmd report with the entire analysis
+
+- And Rmd report has to be created that runs and created all figures in the final presenation
+- The report is cleaned-up
+- The report is stand-alone. Only the report is needed to understand the performed analysis. It should contain explanations/interpretations and code.
