@@ -28,6 +28,7 @@ This case study is part of the university course "Data Visualization and Analysi
 |---------|
 |[Rodrigo Mont'Alegre](https://github.com/[rodrigomontalegre])|
 |[Kader Saygılı](https://github.com/[kadersaygili])|
+|[Yuping Wen](https://github.com/[ettaetta])|
 
 ## Important considerations for the final analysis
 
