@@ -1,0 +1,67 @@
+library(data.table)
+library(dplyr)
+library(tidyr)
+library(magrittr)
+library(ggplot2)
+#Setting personal working directory with all relevant datasets
+
+setwd("C:/Users/Rodrigo/Desktop/TUM/Wintersemester 2021/Data Analysis and Visualization in R/Case Study/data")
+
+#Importing alls .csv files into a list
+
+list_data = list.files(pattern="*.csv")
+my_datatables = lapply(list_data, fread)
+my_datatables
+my_names <- c("case", "patientInfo", "Policy", "Region", "SearchTrend", "SeoulFloating", "Time", "TimeAge", "TimeGender", "TimeProvince", "Weather")
+names(my_datatables) <- my_names
+
+#Mapping list objects to environment
+
+list2env(my_datatables, .GlobalEnv)
+
+#patientInfo dataset
+
+patientInfo[, age := as.numeric(gsub("s", "", age))]
+patientInfo[, lengthcovid := (released_date - confirmed_date)]
+
+mean_length <-patientInfo[, .(mean_length = mean(lengthcovid, na.rm=TRUE)), by = age]
+mean_length <- mean_length[1:10,]
+infections_by_province <- patientInfo[, .(count = .N), by = c("province", "confirmed_date")][, accumulated_sum := cumsum(count)]
+infections_by_province[, n_infections := count]
+
+#policy dataset
+
+policy_type <- Policy[, .(count = .N), by = type] %>% arrange(desc(count))
+
+#time dataset
+
+time_cumsum <- Time[, `:=`(cummulative = cumsum(test), negative_cummulative = cumsum(negative), confirmed_cummulative = cumsum(confirmed), released_cummulative = cumsum(released), deceased_cummulative = cumsum(deceased)), by = date]
+
+time_cumsum <- select(time_cumsum, c(date, cummulative, negative_cummulative, confirmed_cummulative, released_cummulative, deceased_cummulative))
+
+#weather dataset, first two are not correct. Not sure why
+weather_2020 <- Weather[filter(date > "2020-01-01")]
+
+avg_temp_2020 <- weather_2020[, `:=`(average_temp = mean(avg_temp)), by = date]
+
+weather_2020 <- Weather %>%
+  filter(date > "2020-01-01")
+
+avg_temp_2020 <- Weather %>%
+  filter(date > "2020-01-01")%>%
+  group_by(date)%>%
+  summarize(average_temp = mean(avg_temp))
+#Some plots
+
+plot_infections_cumsum <- ggplot(infections_by_province, aes(x = confirmed_date, y = cumsum, color = province)) + geom_line() + ggtitle("Accumulative number of cases in provinces over time")
+plot_infections_daily <- ggplot(infections_by_province, aes(x = confirmed_date, y = n_infections, color = province)) + geom_line() + labs(x = "Confirmed date of infection", y = "Number of daily infections") + theme(legend.position = "bottom") + ggtitle("Number of infections per day in South Korean provinces")
+introduction_policy_time <- ggplot(policy, aes(x = start_date, y = type, color = type)) + geom_point(size = 2) + ggtitle("Introduction of policy over time") + labs(x = "Date policy was introduced", y = "Type of policy") + theme(legend.position = "bottom")
+plot_weather_time <- ggplot(avg_temp_2020, aes(x = date, y = average_temp)) + geom_line() + labs(title = "Average temperature in Korea in 2020", x = "Date", y = "Average temperature")
+length_covid_by_age <- ggplot(patientInfo, aes(age, lengthcovid, color=age)) + geom_point() + labs(title = "Duration of COVID-19 infections in days by age group", x = "Age", y = "Duration in days") + scale_x_continuous(breaks = c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100))
+avg_length_covid_by_age <- ggplot(mean_length, aes(age, mean_length, color= age )) + geom_point() + labs(title = "Average duration of COVID-19 infection by age group", x = "Age", y = "Average duration in number of days") + scale_x_continuous(breaks = c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100))
+
+
+multi_plot_1 <- plot_grid(plot_infections_daily, introduction_policy_time, labels = "AUTO")
+multi_plot_2 <- plot_grid(plot_infections_daily, plot_weather_time, labels = "AUTO")
+
+#testing github connection
