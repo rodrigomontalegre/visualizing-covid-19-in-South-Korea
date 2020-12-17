@@ -43,3 +43,8 @@ This case study is part of the university course "Data Visualization and Analysi
 - And Rmd report has to be created that runs and created all figures in the final presenation
 - The report is cleaned-up
 - The report is stand-alone. Only the report is needed to understand the performed analysis. It should contain explanations/interpretations and code.
+
+## Outside datasets integrated into the project
+
+- Population, Households and Housing Units from the Korean Statistical Information Service (https://kosis.kr/eng/statisticsList/statisticsListIndex.do?menuId=M_01_01&vwcd=MT_ETITLE&parmTabId=M_01_01&statId=1962001&themaId=#SelectStatsBoxDiv)
+
