@@ -30,8 +30,22 @@ pop_info_col_names <- Pop_Info[2, ] #Formatting the data for population info
 pop_info_col_names <- as.character(pop_info_col_names)
 names(Pop_Info) <- pop_info_col_names
 names(Pop_Info) <- gsub("-", "_", names(Pop_Info))
+names(Pop_Info) <- gsub(" _ ", "_", names(Pop_Info))
 names(Pop_Info) <- gsub(" ", "_", names(Pop_Info))
-names(Pop_Info) <- gsub("_-_", "_", names(Pop_Info))
+Pop_Info <- Pop_Info[3:.N, 1:10] #Selecting only necessary columns
+cols <- c("Total_population_(Person)",
+          "Male_(Person)",
+          "Female_(Person)",
+          "Korean_total_(Person)",
+          "Korean_male_(Person)",
+          "Korean_Female_(Person)",
+          "Foreigner_Total_(Person)",
+          "Foreigner_Male_(Person)",
+          "Foreigner_Female_(Person)")
+Pop_Info <- Pop_Info[, (cols) := lapply(.SD, as.numeric), .SDcols = cols] #all but first columns as numeric
+
+
+#changing columns 2:10 to numeric class
 
 #patientInfo dataset
 
