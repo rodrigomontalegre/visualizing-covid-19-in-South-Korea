@@ -42,7 +42,7 @@ cols <- c("Total_population_(Person)",
           "Foreigner_Total_(Person)",
           "Foreigner_Male_(Person)",
           "Foreigner_Female_(Person)")
-Pop_Info <- Pop_Info[, (cols) := lapply(.SD, as.numeric), .SDcols = cols] #all but first columns as numeric
+Pop_Info <- Pop_Info[, (cols) := lapply(.SD, as.numeric), .SDcols = cols] #Columns as type numeric
 
 
 #changing columns 2:10 to numeric class
