@@ -29,16 +29,10 @@ list2env(my_datatables, .GlobalEnv)
 pop_info_col_names <- Pop_Info[2, ] #Formatting the data for population info
 pop_info_col_names <- as.character(pop_info_col_names)
 names(Pop_Info) <- pop_info_col_names
+names(Pop_Info) <- gsub("-", "_", names(Pop_Info))
 names(Pop_Info) <- gsub(" ", "_", names(Pop_Info))
-Pop_Info <- Pop_Info[3:.N, 1:10] #Selecting only the necessary columns
+names(Pop_Info) <- gsub("_-_", "_", names(Pop_Info))
 
-
-Pop_Info <- Pop_Info[, lapply(2:10, as.integer)]
-?lapply
-
-head(Pop_Info)
-View(Pop_Info)
-View(Region)
 #patientInfo dataset
 
 patientInfo[, age := as.numeric(gsub("s", "", age))][,lengthcovid := (released_date - confirmed_date)]
