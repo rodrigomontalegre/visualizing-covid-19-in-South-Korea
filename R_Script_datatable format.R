@@ -1,8 +1,13 @@
+##################
+Loading libraries#
+##################
+
 library(data.table)
 library(dplyr)
 library(tidyr)
 library(magrittr)
 library(ggplot2)
+
 #Setting personal working directory with all relevant datasets
 
 setwd("C:/Users/Rodrigo/Desktop/TUM/Wintersemester 2021/Data Analysis and Visualization in R/Case Study/data")
@@ -12,22 +17,37 @@ setwd("C:/Users/Rodrigo/Desktop/TUM/Wintersemester 2021/Data Analysis and Visual
 list_data = list.files(pattern="*.csv")
 my_datatables = lapply(list_data, fread)
 my_datatables
-my_names <- c("case", "patientInfo", "Policy", "Region", "SearchTrend", "SeoulFloating", "Time", "TimeAge", "TimeGender", "TimeProvince", "Weather")
+my_names <- c("case", "patientInfo", "Policy", "Pop_Info", "Region", "SearchTrend", "SeoulFloating", "Time", "TimeAge", "TimeGender", "TimeProvince", "Weather")
 names(my_datatables) <- my_names
 
 #Mapping list objects to environment
 
 list2env(my_datatables, .GlobalEnv)
 
+#First hypothesis: Population density correlates with number of cases
+
+pop_info_col_names <- Pop_Info[2, ] #Formatting the data for population info
+pop_info_col_names <- as.character(pop_info_col_names)
+names(Pop_Info) <- pop_info_col_names
+names(Pop_Info) <- gsub(" ", "_", names(Pop_Info))
+Pop_Info <- Pop_Info[3:.N, 1:10] #Selecting only the necessary columns
+
+
+Pop_Info <- Pop_Info[, lapply(2:10, as.integer)]
+?lapply
+
+head(Pop_Info)
+View(Pop_Info)
+View(Region)
 #patientInfo dataset
 
-patientInfo[, age := as.numeric(gsub("s", "", age))]
-patientInfo[, lengthcovid := (released_date - confirmed_date)]
-
+patientInfo[, age := as.numeric(gsub("s", "", age))][,lengthcovid := (released_date - confirmed_date)]
 mean_length <-patientInfo[, .(mean_length = mean(lengthcovid, na.rm=TRUE)), by = age]
 mean_length <- mean_length[1:10,]
-infections_by_province <- patientInfo[, .(count = .N), by = c("province", "confirmed_date")][, accumulated_sum := cumsum(count)]
+infections_by_province <- patientInfo[, .(count = .N),by = c("province", "confirmed_date")][, accumulated_sum := cumsum(count)]
 infections_by_province[, n_infections := count]
+
+patientInto[, ]
 
 #policy dataset
 
