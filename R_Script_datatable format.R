@@ -95,7 +95,8 @@ plot_a <- ggplot(cases_pop_density) + #first plot density and cases
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.background = element_blank())
-plot_a + geom_line(cases_pop_density, #added line onto bar plot
+
+plot_a <- plot_a + geom_line(cases_pop_density, #added line onto bar plot
                    mapping = aes(x = province,
                                  y = 0.3*Pop_dens_sq_km,
                                  group = 1),
