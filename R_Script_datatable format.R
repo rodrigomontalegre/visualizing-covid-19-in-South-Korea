@@ -72,7 +72,8 @@ latest_infections <- infections_by_province[order(-as.IDate(confirmed_date,
 latest_total <- list(province = "Whole country",
                   confirmed_date = as.IDate("2020-06-30"),
                   accumulated_sum = sum(latest_infections$accumulated_sum)) #extra obersvation for country total
-latest_infections <- rbind(latest_infections, latest_total)
+
+latest_infections_national <- rbind(latest_infections, latest_total)
 
 cases_pop_density <- latest_infections[Pop_Density, 
                                        on = c("province" = "By administrative divisions")] #province "sejong-si" was in Pop_Density but not cases. Why?
@@ -80,7 +81,14 @@ cases_pop_density <- latest_infections[Pop_Density,
 cases_pop_density[order(-accumulated_sum)] #checking provinces with most cases
 cases_pop_density[order(-Pop_dens_sq_km)] #checking provinces with highest population density
 
-
+plot_a <- ggplot(cases_pop_density, aes(x = reorder(province, -accumulated_sum),
+                                        y = accumulated_sum)) +
+  geom_bar(stat = "identity",
+           alpha = 0.75) +
+  labs(title = "Population density and COVID-19 cases per province",
+       x = "South Korean Province",
+       y = "Number of cases") +
+  theme(axis.text.x = element_text(angle = 90))
 
 #patientInfo dataset
 
