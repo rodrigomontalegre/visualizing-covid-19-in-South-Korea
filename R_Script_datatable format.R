@@ -75,7 +75,12 @@ latest_total <- list(province = "Whole country",
 latest_infections <- rbind(latest_infections, latest_total)
 
 cases_pop_density <- latest_infections[Pop_Density, 
-                                       on = c("province" = "By administrative divisions")]
+                                       on = c("province" = "By administrative divisions")] #province "sejong-si" was in Pop_Density but not cases. Why?
+
+cases_pop_density[order(-accumulated_sum)] #checking provinces with most cases
+cases_pop_density[order(-Pop_dens_sq_km)] #checking provinces with highest population density
+
+
 
 #patientInfo dataset
 
