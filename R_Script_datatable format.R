@@ -83,25 +83,26 @@ cases_pop_density[order(-Pop_dens_sq_km)] #checking provinces with highest popul
 
 cases_pop_density <- cases_pop_density[province != "Whole country"][province != "Sejong-si"]
 
-plot_a <- ggplot(cases_pop_density) + #plot isnt as I need it yet
-  geom_bar(aes(x = reorder(province, -accumulated_sum),
-               y = accumulated_sum), stat = "identity",
+plot_a <- ggplot(cases_pop_density) + #first plot density and cases
+  geom_col(aes(x = reorder(province, -accumulated_sum),
+               y = accumulated_sum),
            alpha = 0.75,
            fill = "dark blue") +
   labs(title = "Population density and COVID-19 cases per province",
        x = "South Korean Province",
        y = "Number of cases") +
-  theme(axis.text.x = element_text(angle = 90))
-
-plot_a + geom_line(cases_pop_density,
+  theme(axis.text.x = element_text(angle = 90),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank())
+plot_a + geom_line(cases_pop_density, #added line onto bar plot
                    mapping = aes(x = province,
                                  y = 0.3*Pop_dens_sq_km,
                                  group = 1),
-                   color = "red") +
+                   color = "red",
+                   size = 1) +
   scale_y_continuous(sec.axis = sec_axis(~./0.3,
                                          name = "Population Density"))
-
-
 
 
 
