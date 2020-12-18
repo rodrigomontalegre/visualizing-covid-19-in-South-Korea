@@ -72,12 +72,10 @@ latest_infections <- infections_by_province[order(-as.IDate(confirmed_date,
 latest_total <- list(province = "Whole country",
                   confirmed_date = as.IDate("2020-06-30"),
                   accumulated_sum = sum(latest_infections$accumulated_sum)) #extra obersvation for country total
-rbind(latest_infections, latest_total)
+latest_infections <- rbind(latest_infections, latest_total)
 
-
-
-
-
+cases_pop_density <- latest_infections[Pop_Density, 
+                                       on = c("province" = "By administrative divisions")]
 
 #patientInfo dataset
 
