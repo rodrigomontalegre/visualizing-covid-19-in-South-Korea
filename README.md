@@ -48,3 +48,4 @@ This case study is part of the university course "Data Visualization and Analysi
 
 - Population, Households and Housing Units from the Korean Statistical Information Service (https://kosis.kr/eng/statisticsList/statisticsListIndex.do?menuId=M_01_01&vwcd=MT_ETITLE&parmTabId=M_01_01&statId=1962001&themaId=#SelectStatsBoxDiv)
 
+- Population density by population census frmo the Korean Statistical Information Serivce (https://kosis.kr/eng/statisticsList/statisticsListIndex.do?menuId=M_01_01&vwcd=MT_ETITLE&parmTabId=M_01_01#SelectStatsBoxDiv)
