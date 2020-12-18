@@ -17,7 +17,19 @@ setwd("C:/Users/Rodrigo/Desktop/TUM/Wintersemester 2021/Data Analysis and Visual
 list_data = list.files(pattern="*.csv")
 my_datatables = lapply(list_data, fread)
 my_datatables
-my_names <- c("case", "patientInfo", "Policy", "Pop_Info", "Region", "SearchTrend", "SeoulFloating", "Time", "TimeAge", "TimeGender", "TimeProvince", "Weather")
+my_names <- c("case",
+              "patientInfo",
+              "Policy",
+              "Pop_Info",
+              "Pop_Density",
+              "Region",
+              "SearchTrend",
+              "SeoulFloating",
+              "Time",
+              "TimeAge",
+              "TimeGender",
+              "TimeProvince",
+              "Weather") #Sorted alphabetically
 names(my_datatables) <- my_names
 
 #Mapping list objects to environment
@@ -44,8 +56,35 @@ cols <- c("Total_population_(Person)",
           "Foreigner_Female_(Person)")
 Pop_Info <- Pop_Info[, (cols) := lapply(.SD, as.numeric), .SDcols = cols] #Columns as type numeric
 
+pop_dens_col_names <- as.character(Pop_Density[1, ]) #formatting the data for population density
+names(Pop_Density) <- pop_dens_col_names
+Pop_Density[, c("2005", "2010"):= NULL]
+Pop_Density <- Pop_Density[2:.N]
+Pop_Density[, Pop_dens_sq_km := `2015`][, `2015` := NULL]
+infections_by_province <- patientInfo[, .(count = .N),by = c("province",
+                                                             "confirmed_date")][, accumulated_sum := cumsum(count)]
+infections_by_province[, n_infections := count]
+latest_infections <- infections_by_province[order(-as.IDate(confirmed_date, 
+                                                             "%Y-%m-%d")), 
+                                             head(.SD, 1), 
+                                             by = province][, c("count",
+                                                                "n_infections") := NULL]
+latest_total <- (c("Whole country",
+                  "2020-06-30",
+                  sum(latest_infections$accumulated_sum))) #extra obersvation for country total
 
-#changing columns 2:10 to numeric class
+
+colnames(latest_total) <- c("Province", "confirmed_date", "accumulated_sum")
+
+
+latest_total <- as.data.table(latest_total)
+
+rbind(latest_infections, list(latest_total))
+
+
+
+
+
 
 #patientInfo dataset
 
@@ -55,7 +94,6 @@ mean_length <- mean_length[1:10,]
 infections_by_province <- patientInfo[, .(count = .N),by = c("province", "confirmed_date")][, accumulated_sum := cumsum(count)]
 infections_by_province[, n_infections := count]
 
-patientInto[, ]
 
 #policy dataset
 
@@ -79,6 +117,7 @@ avg_temp_2020 <- Weather %>%
   filter(date > "2020-01-01")%>%
   group_by(date)%>%
   summarize(average_temp = mean(avg_temp))
+
 #Some plots
 
 plot_infections_cumsum <- ggplot(infections_by_province, aes(x = confirmed_date, y = cumsum, color = province)) + geom_line() + ggtitle("Accumulative number of cases in provinces over time")
