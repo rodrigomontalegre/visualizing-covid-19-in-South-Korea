@@ -83,7 +83,7 @@ cases_pop_density <- latest_infections[Pop_Density,
 cases_pop_density[order(-accumulated_sum)] #checking provinces with most cases
 cases_pop_density[order(-Pop_dens_sq_km)] #checking provinces with highest population density
 
-cases_pop_density <- cases_pop_density[province != "Whole country"]
+cases_pop_density <- cases_pop_density[province != c("Whole country", "Sejong-si")]
 
 plot_a <- ggplot(cases_pop_density) + #first plot density and cases
   geom_col(aes(x = reorder(province, -accumulated_sum),
@@ -143,9 +143,9 @@ fp_over_time <- ggplot(SeoulFloating, aes(x = date,
 infections_seoul <- patientInfo[province == "Seoul",
                                 .(count = .N), 
                                 by = c("confirmed_date")][, accumulated_sum := cumsum(count)]
-
-
-
+fp_cases_seoul <- fp_over_time +
+  geom_line(infections_seoul, aes(x = Date,
+                                  y = accumulated_sum)) #combining floating population with cases in Seoul
 
 #patientInfo dataset
 
