@@ -1,5 +1,5 @@
 ##################
-Loading libraries#
+#Loading libraries
 ##################
 
 library(data.table)
@@ -83,7 +83,7 @@ cases_pop_density <- latest_infections[Pop_Density,
 cases_pop_density[order(-accumulated_sum)] #checking provinces with most cases
 cases_pop_density[order(-Pop_dens_sq_km)] #checking provinces with highest population density
 
-cases_pop_density <- cases_pop_density[province != "Whole country"][province != "Sejong-si"]
+cases_pop_density <- cases_pop_density[province != "Whole country"]
 
 plot_a <- ggplot(cases_pop_density) + #first plot density and cases
   geom_col(aes(x = reorder(province, -accumulated_sum),
@@ -109,9 +109,9 @@ plot_cases_popdensity <- plot_a + geom_line(cases_pop_density, #added line onto 
 
 korea_map <- readOGR("C:/Users/Rodrigo/Desktop/TUM/Wintersemester 2021/Data Analysis and Visualization in R/Case Study/data/KOR_adm",
         layer = "KOR_adm1") #creating a map to visualize the differences
-korea_map <- fortify(korea_map) #shape file is now a dataframe
+korea_map <- fortify(korea_map, region = "NAME_1") #shape file is now a dataframe
 korea_map <- cases_pop_density[korea_map, 
-                               on = c("province")]
+                               on = c("province" = "id")]
 
 map1 <- ggplot(data = korea_map, #this is the base for the maps
                aes(x = long,
@@ -128,7 +128,23 @@ map_pop_density <- map1 + geom_polygon(aes(fill = Pop_dens_sq_km)) +
        fill = "Population density") +
   scale_fill_viridis(option = "plasma", direction = 1)
 
-#Second hypothesis: The spread of COVID-19 affected traffic flows in Seoul
+#Second hypothesis: The spread of COVID-19 affected floating population in Seoul
+
+SeoulFloating[, mean_fp_num := mean(fp_num), by = date]
+
+fp_over_time <- ggplot(SeoulFloating, aes(x = date,
+                                          y = mean_fp_num)) +
+  geom_line() +
+  labs(title = "Average Floating Population in Seoul over time",
+       x = "Date",
+       y = "Floating Population Average") +
+  theme_bw()
+
+infections_seoul <- patientInfo[province == "Seoul",
+                                .(count = .N), 
+                                by = c("confirmed_date")][, accumulated_sum := cumsum(count)]
+
+
 
 
 #patientInfo dataset
