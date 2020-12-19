@@ -7,6 +7,8 @@ library(dplyr)
 library(tidyr)
 library(magrittr)
 library(ggplot2)
+library(rgdal)
+library(viridis) #for map coloring
 
 #Setting personal working directory with all relevant datasets
 
@@ -96,7 +98,7 @@ plot_a <- ggplot(cases_pop_density) + #first plot density and cases
         panel.grid.minor = element_blank(),
         panel.background = element_blank())
 
-plot_a <- plot_a + geom_line(cases_pop_density, #added line onto bar plot
+plot_cases_popdensity <- plot_a + geom_line(cases_pop_density, #added line onto bar plot
                    mapping = aes(x = province,
                                  y = 0.3*Pop_dens_sq_km,
                                  group = 1),
@@ -104,6 +106,31 @@ plot_a <- plot_a + geom_line(cases_pop_density, #added line onto bar plot
                    size = 1) +
   scale_y_continuous(sec.axis = sec_axis(~./0.3,
                                          name = "Population Density"))
+
+korea_map <- readOGR("C:/Users/Rodrigo/Desktop/TUM/Wintersemester 2021/Data Analysis and Visualization in R/Case Study/data/KOR_adm",
+        layer = "KOR_adm1") #creating a map to visualize the differences
+korea_map <- fortify(korea_map) #shape file is now a dataframe
+korea_map <- cases_pop_density[korea_map, 
+                               on = c("province")]
+
+map1 <- ggplot(data = korea_map, #this is the base for the maps
+               aes(x = long,
+                   y = lat,
+                   group = group)) + theme_bw()
+  
+map_cases <- map1 + geom_polygon(aes(fill = accumulated_sum)) +
+  labs(title = "Accumulated cases in South Korean Provinces", 
+       fill = "Total number of cases") +
+  scale_fill_viridis(option = "plasma", direction = 1)
+
+map_pop_density <- map1 + geom_polygon(aes(fill = Pop_dens_sq_km)) +
+  labs(title = "Population Density in South Korean Provinces", 
+       fill = "Population density") +
+  scale_fill_viridis(option = "plasma", direction = 1)
+
+
+
+
 
 
 
@@ -153,5 +180,3 @@ avg_length_covid_by_age <- ggplot(mean_length, aes(age, mean_length, color= age 
 
 multi_plot_1 <- plot_grid(plot_infections_daily, introduction_policy_time, labels = "AUTO")
 multi_plot_2 <- plot_grid(plot_infections_daily, plot_weather_time, labels = "AUTO")
-
-#testing github connection
