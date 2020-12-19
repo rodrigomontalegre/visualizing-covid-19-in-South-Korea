@@ -128,12 +128,7 @@ map_pop_density <- map1 + geom_polygon(aes(fill = Pop_dens_sq_km)) +
        fill = "Population density") +
   scale_fill_viridis(option = "plasma", direction = 1)
 
-
-
-
-
-
-
+#Second hypothesis: The spread of COVID-19 affected traffic flows in Seoul
 
 
 #patientInfo dataset
