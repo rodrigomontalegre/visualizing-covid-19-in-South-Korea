@@ -105,7 +105,7 @@ plot_cases_popdensity <- plot_a + geom_line(cases_pop_density, #added line onto 
                    color = "red",
                    size = 1) +
   scale_y_continuous(sec.axis = sec_axis(~./0.3,
-                                         name = "Population Density"))
+                                         name = "Population Density")) #adds a second y-axis #need to improve the graph
 
 korea_map <- readOGR("C:/Users/Rodrigo/Desktop/TUM/Wintersemester 2021/Data Analysis and Visualization in R/Case Study/data/KOR_adm",
         layer = "KOR_adm1") #creating a map to visualize the differences
@@ -143,9 +143,15 @@ fp_over_time <- ggplot(SeoulFloating, aes(x = date,
 infections_seoul <- patientInfo[province == "Seoul",
                                 .(count = .N), 
                                 by = c("confirmed_date")][, accumulated_sum := cumsum(count)]
-fp_cases_seoul <- fp_over_time +
-  geom_line(infections_seoul, aes(x = Date,
-                                  y = accumulated_sum)) #combining floating population with cases in Seoul
+
+# seoulFloating_infections <- SeoulFloating[infections_seoul, on = c("date" = "confirmed_date")][!date > "2020-05-31"] #SeoulFloating data missing for June, so I decided only to depict January - May
+
+fp_cases_seoul <- fp_over_time + #Need to fix scaling for second y axis
+  geom_line(data = infections_seoul, 
+            aes(x = confirmed_date, 
+                y = accumulated_sum)) +
+  scale_y_continuous(sec.axis = sec_axis(~./50, name = "COVID-19 Cases")) #combining floating population with cases in Seoul
+
 
 #patientInfo dataset
 
