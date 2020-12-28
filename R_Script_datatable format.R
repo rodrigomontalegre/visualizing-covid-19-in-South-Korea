@@ -149,28 +149,27 @@ outlierReplace = function(dataframe, cols, rows, newValue = NA) { #function to r
 
 outlierReplace(SeoulFloating, "mean_fp_num", which(SeoulFloating$mean_fp_num > 51000), NA)
 
-fp_over_time <- ggplot(SeoulFloating, aes(x = date,
+fp_plot <- ggplot(SeoulFloating, aes(x = date,
                                           y = mean_fp_num)) +
   geom_line() +
   labs(title = "Average Floating Population in Seoul over time",
        x = "Date",
        y = "Floating Population Average") +
+  scale_x_date(date_breaks = "1 month",
+               date_labels = "%B",
+               limits = as.Date(c("2020-01-01", "2020-05-31"))) +
   theme_bw()
 
 infections_seoul <- patientInfo[province == "Seoul",
                                 .(count = .N), 
                                 by = c("confirmed_date")][, accumulated_sum := cumsum(count)]
-
-fp_cases_seoul <- fp_over_time + #Need to fix scaling for second y axis
-  geom_line(data = infections_seoul, 
-            aes(x = confirmed_date, 
-                y = accumulated_sum,), linetype = "dashed") +
-  scale_x_date(date_breaks = "1 month",
-               date_labels = "%B",
-               limits = as.Date(c("2020-01-01", "2020-05-31"))) +
-  scale_y_continuous(sec.axis = sec_axis(~./50, name = "COVID-19 Cases")) #combining floating population with cases in Seoul
-
-
+is_plot <- ggplot(infections_seoul, aes(x = confirmed_date,
+                                        y = accumulated_sum)) +
+  geom_line() + 
+  labs(title = "Total number of cases in Seoul",
+       x = "Date",
+       y = "Accumulated number of cases") +
+  theme_bw()
 
 #patientInfo dataset
 
