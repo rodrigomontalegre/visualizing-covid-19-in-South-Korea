@@ -9,6 +9,10 @@ library(magrittr)
 library(ggplot2)
 library(rgdal)
 library(viridis) #for map coloring
+library(outliers) #for testing max value in SeoulFloating
+
+Sys.setlocale(category = "LC_ALL", locale = "english")
+
 
 #Setting personal working directory with all relevant datasets
 
@@ -132,6 +136,19 @@ map_pop_density <- map1 + geom_polygon(aes(fill = Pop_dens_sq_km)) +
 
 SeoulFloating[, mean_fp_num := mean(fp_num), by = date]
 
+summary(SeoulFloating$mean_fp_num) # Max could be an outlier
+tail(unique(sort(SeoulFloating$mean_fp_num)))
+outlier_test <- grubbs.test(SeoulFloating$mean_fp_num)
+print(outlier_test) #H0: The highest value is not an outlier. WIth p < 0.05, we reject H0, meaning the max value is an outlier. 
+
+outlierReplace = function(dataframe, cols, rows, newValue = NA) { #function to remove specified outliers
+  if(any(rows)) {
+    set(dataframe, rows, cols, newValue)
+  }
+}
+
+outlierReplace(SeoulFloating, "mean_fp_num", which(SeoulFloating$mean_fp_num > 51000), NA)
+
 fp_over_time <- ggplot(SeoulFloating, aes(x = date,
                                           y = mean_fp_num)) +
   geom_line() +
@@ -144,13 +161,15 @@ infections_seoul <- patientInfo[province == "Seoul",
                                 .(count = .N), 
                                 by = c("confirmed_date")][, accumulated_sum := cumsum(count)]
 
-# seoulFloating_infections <- SeoulFloating[infections_seoul, on = c("date" = "confirmed_date")][!date > "2020-05-31"] #SeoulFloating data missing for June, so I decided only to depict January - May
-
 fp_cases_seoul <- fp_over_time + #Need to fix scaling for second y axis
   geom_line(data = infections_seoul, 
             aes(x = confirmed_date, 
-                y = accumulated_sum)) +
+                y = accumulated_sum,), linetype = "dashed") +
+  scale_x_date(date_breaks = "1 month",
+               date_labels = "%B",
+               limits = as.Date(c("2020-01-01", "2020-05-31"))) +
   scale_y_continuous(sec.axis = sec_axis(~./50, name = "COVID-19 Cases")) #combining floating population with cases in Seoul
+
 
 
 #patientInfo dataset
