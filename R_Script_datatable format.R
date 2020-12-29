@@ -157,12 +157,14 @@ sf_is <- merge(SeoulFloating, infections_seoul, by.x = "date", by.y = "confirmed
 sf_is <- sf_is[date >= "2020-01-01" & date <= "2020-05-31"][!duplicated(date)][, c("date",
                                                                            "mean_fp_num",
                                                                            "accumulated_sum")]
-lm1 <- lm(mean_fp_num ~ accumulated_sum, data = sf_is)
-summary(lm1) #not statistically significant
+lm_cases <- lm(mean_fp_num ~ accumulated_sum, data = sf_is)
+summary(lm_cases) #not statistically significant
 
 weather_seoul_2020 <- Weather[date >= "2020-01-01" & date <= "2020-05-31" & province == "Seoul"][, c("date",
                                                                                                      "avg_temp")] #preparing weather dataset. Rising average temperature could affect floating population average
-
+sf_is2 <- merge(sf_is, weather_seoul_2020, by = "date")
+lm_cases_temp <- lm(mean_fp_num ~ accumulated_sum + avg_temp, data = sf_is2)
+summary(lm_cases_temp) #not statistically significant
 
 #patientInfo dataset
 
