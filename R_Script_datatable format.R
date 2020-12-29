@@ -152,10 +152,11 @@ is_plot <- ggplot(infections_seoul, aes(x = confirmed_date,
   theme_bw()
 
 #Statistical testing of the relationship
-sf_is <- SeoulFloating[infections_seoul, #why are some dates omitted?
-                       on = c("date" = "confirmed_date")][date <= "2020-05-31" & date >= "2020-01-01" ][, c("date",
-                                                                                                            "mean_fp_num",
-                                                                                                            "accumulated_sum")][!duplicated(date)]
+
+sf_is <- merge(SeoulFloating, infections_seoul, by.x = "date", by.y = "confirmed_date", all = TRUE)
+sf_is <- sf_is[date >= "2020-01-01" & date <= "2020-05-31"][!duplicated(date)][, c("date",
+                                                                           "mean_fp_num",
+                                                                           "accumulated_sum")]
 lm1 <- lm(mean_fp_num ~ accumulated_sum, data = sf_is)
 summary(lm1) #not statistically significant
 
