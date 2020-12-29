@@ -11,9 +11,6 @@ library(rgdal)
 library(viridis) #for map coloring
 library(outliers) #for testing max value in SeoulFloating
 
-Sys.setlocale(category = "LC_ALL", locale = "english")
-
-
 #Setting personal working directory with all relevant datasets
 
 setwd("C:/Users/Rodrigo/Desktop/TUM/Wintersemester 2021/Data Analysis and Visualization in R/Case Study/data")
@@ -43,24 +40,6 @@ names(my_datatables) <- my_names
 list2env(my_datatables, .GlobalEnv)
 
 #First hypothesis: Population density correlates with number of cases
-
-pop_info_col_names <- Pop_Info[2, ] #Formatting the data for population info
-pop_info_col_names <- as.character(pop_info_col_names)
-names(Pop_Info) <- pop_info_col_names
-names(Pop_Info) <- gsub("-", "_", names(Pop_Info))
-names(Pop_Info) <- gsub(" _ ", "_", names(Pop_Info))
-names(Pop_Info) <- gsub(" ", "_", names(Pop_Info))
-Pop_Info <- Pop_Info[3:.N, 1:10] #Selecting only necessary columns
-cols <- c("Total_population_(Person)",
-          "Male_(Person)",
-          "Female_(Person)",
-          "Korean_total_(Person)",
-          "Korean_male_(Person)",
-          "Korean_Female_(Person)",
-          "Foreigner_Total_(Person)",
-          "Foreigner_Male_(Person)",
-          "Foreigner_Female_(Person)")
-Pop_Info <- Pop_Info[, (cols) := lapply(.SD, as.numeric), .SDcols = cols] #Columns as type numeric
 
 pop_dens_col_names <- as.character(Pop_Density[1, ]) #formatting the data for population density
 names(Pop_Density) <- pop_dens_col_names
@@ -147,7 +126,7 @@ outlierReplace = function(dataframe, cols, rows, newValue = NA) { #function to r
   }
 }
 
-outlierReplace(SeoulFloating, "mean_fp_num", which(SeoulFloating$mean_fp_num > 51000), NA)
+outlierReplace(SeoulFloating, "mean_fp_num", which(SeoulFloating$mean_fp_num > 51000), NA) #might decide to keep the outlier
 
 fp_plot <- ggplot(SeoulFloating, aes(x = date,
                                           y = mean_fp_num)) +
@@ -158,7 +137,8 @@ fp_plot <- ggplot(SeoulFloating, aes(x = date,
   scale_x_date(date_breaks = "1 month",
                date_labels = "%B",
                limits = as.Date(c("2020-01-01", "2020-05-31"))) +
-  theme_bw()
+  theme_bw() +
+  geom_smooth()
 
 infections_seoul <- patientInfo[province == "Seoul",
                                 .(count = .N), 
@@ -170,6 +150,18 @@ is_plot <- ggplot(infections_seoul, aes(x = confirmed_date,
        x = "Date",
        y = "Accumulated number of cases") +
   theme_bw()
+
+#Statistical testing of the relationship
+sf_is <- SeoulFloating[infections_seoul, #why are some dates omitted?
+                       on = c("date" = "confirmed_date")][date <= "2020-05-31" & date >= "2020-01-01" ][, c("date",
+                                                                                                            "mean_fp_num",
+                                                                                                            "accumulated_sum")][!duplicated(date)]
+lm1 <- lm(mean_fp_num ~ accumulated_sum, data = sf_is)
+summary(lm1) #not statistically significant
+
+weather_seoul_2020 <- Weather[date >= "2020-01-01" & date <= "2020-05-31" & province == "Seoul"][, c("date",
+                                                                                                     "avg_temp")] #preparing weather dataset. Rising average temperature could affect floating population average
+
 
 #patientInfo dataset
 
