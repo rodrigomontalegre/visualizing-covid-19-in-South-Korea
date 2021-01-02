@@ -46,8 +46,6 @@ This case study is part of the university course "Data Visualization and Analysi
 
 ## Outside datasets integrated into the project
 
-- Population, Households and Housing Units from the Korean Statistical Information Service (https://kosis.kr/eng/statisticsList/statisticsListIndex.do?menuId=M_01_01&vwcd=MT_ETITLE&parmTabId=M_01_01&statId=1962001&themaId=#SelectStatsBoxDiv)
-
 - Population density by population census frmo the Korean Statistical Information Serivce (https://kosis.kr/eng/statisticsList/statisticsListIndex.do?menuId=M_01_01&vwcd=MT_ETITLE&parmTabId=M_01_01#SelectStatsBoxDiv)
 
--Shape file for a map of South Korea from University of Michigan and GADM (https://gadm.org/download_country_v2.html)
+- Shape file for a map of South Korea from University of Michigan and GADM (https://gadm.org/download_country_v2.html)
