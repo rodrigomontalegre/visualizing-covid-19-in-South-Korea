@@ -60,13 +60,11 @@ latest_total <- list(province = "Whole country",
 
 latest_infections_national <- rbind(latest_infections, latest_total)
 
-cases_pop_density <- latest_infections[Pop_Density, 
-                                       on = c("province" = "By administrative divisions")] #province "sejong-si" was in Pop_Density but not cases. Why?
+cases_pop_density <- merge(latest_infections, Pop_Density, by.x = "province", by.y = "By administrative divisions", all = FALSE)
+
 
 cases_pop_density[order(-accumulated_sum)] #checking provinces with most cases
 cases_pop_density[order(-Pop_dens_sq_km)] #checking provinces with highest population density
-
-cases_pop_density <- cases_pop_density[province != c("Whole country", "Sejong-si")]
 
 plot_a <- ggplot(cases_pop_density) + #first plot density and cases
   geom_col(aes(x = reorder(province, -accumulated_sum),
