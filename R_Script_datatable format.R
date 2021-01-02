@@ -104,12 +104,14 @@ map1 <- ggplot(data = korea_map, #this is the base for the maps
 map_cases <- map1 + geom_polygon(aes(fill = accumulated_sum)) +
   labs(title = "Accumulated cases in South Korean Provinces", 
        fill = "Total number of cases") +
-  scale_fill_viridis(option = "plasma", direction = 1)
+  scale_fill_viridis(option = "plasma", direction = 1) +
+  geom_path(aes(x = long, y = lat, group = group), color = "black", size = 1) #outlines provinces
 
 map_pop_density <- map1 + geom_polygon(aes(fill = Pop_dens_sq_km)) +
   labs(title = "Population Density in South Korean Provinces", 
        fill = "Population density") +
-  scale_fill_viridis(option = "plasma", direction = 1)
+  scale_fill_viridis(option = "plasma", direction = 1) +
+  geom_path(aes(x = long, y = lat, group = group), color = "black", size = 1) #outlines provinces
 
 #Second hypothesis: The spread of COVID-19 affected floating population in Seoul
 
