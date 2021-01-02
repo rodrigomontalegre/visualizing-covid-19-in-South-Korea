@@ -99,7 +99,7 @@ korea_map <- cases_pop_density[korea_map,
 map1 <- ggplot(data = korea_map, #this is the base for the maps
                aes(x = long,
                    y = lat,
-                   group = group)) + theme_bw()
+                   group = group)) + theme_bw() + theme(legend.background = element_rect(fill = "white", color = "black"))
   
 map_cases <- map1 + geom_polygon(aes(fill = accumulated_sum)) +
   labs(title = "Accumulated cases in South Korean Provinces", 
@@ -168,11 +168,16 @@ sf_is2 <- merge(sf_is, weather_seoul_2020, by = "date")
 lm_cases_temp <- lm(mean_fp_num ~ accumulated_sum + avg_temp, data = sf_is2)
 summary(lm_cases_temp) #not statistically significant
 
+#Third hypothesis: Age groups are affected by different infection durations (Kedi)
+patientInfo[, age := as.numeric(gsub("s", "", age))][,lengthcovid := (released_date - confirmed_date)] #What about deceased date? OR operator possible?
+mean_length <-patientInfo[, .(mean_length = mean(lengthcovid, na.rm = TRUE)), by = age][order(age)]
+mean_length <- mean_length[age != 100]
+
+
 #patientInfo dataset
 
-patientInfo[, age := as.numeric(gsub("s", "", age))][,lengthcovid := (released_date - confirmed_date)]
-mean_length <-patientInfo[, .(mean_length = mean(lengthcovid, na.rm=TRUE)), by = age]
-mean_length <- mean_length[1:10,]
+
+
 infections_by_province <- patientInfo[, .(count = .N),by = c("province", "confirmed_date")][, accumulated_sum := cumsum(count)]
 infections_by_province[, n_infections := count]
 
