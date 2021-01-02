@@ -169,10 +169,21 @@ lm_cases_temp <- lm(mean_fp_num ~ accumulated_sum + avg_temp, data = sf_is2)
 summary(lm_cases_temp) #not statistically significant
 
 #Third hypothesis: Age groups are affected by different infection durations (Kedi)
+
 patientInfo[, age := as.numeric(gsub("s", "", age))][,lengthcovid := (released_date - confirmed_date)] #What about deceased date? OR operator possible?
+patientInfo$age <- as.factor(patientInfo$age)
 mean_length <-patientInfo[, .(mean_length = mean(lengthcovid, na.rm = TRUE)), by = age][order(age)]
 mean_length <- mean_length[age != 100]
+mean_length$age <- as.factor(mean_length$age)
 
+plot_b <- ggplot(patientInfo,
+                 aes(x = age,
+                     y = lengthcovid)) +
+  geom_boxplot() +
+  labs(title = "Average length of COVID-19 infection by age group",
+       x = "Age group",
+       y = "Amount of time in days") +
+  theme_bw()
 
 #patientInfo dataset
 
