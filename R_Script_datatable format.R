@@ -23,7 +23,6 @@ my_datatables
 my_names <- c("case",
               "patientInfo",
               "Policy",
-              "Pop_Info",
               "Pop_Density",
               "Region",
               "SearchTrend",
@@ -70,6 +69,7 @@ plot_a <- ggplot(cases_pop_density) + #first plot density and cases
   geom_col(aes(x = reorder(province, -accumulated_sum),
                y = accumulated_sum),
            alpha = 0.75,
+           width = 0.7,
            fill = "dark blue") +
   labs(title = "Population density and COVID-19 cases per province",
        x = "South Korean Province",
@@ -85,12 +85,14 @@ plot_cases_popdensity <- plot_a + geom_line(cases_pop_density, #added line onto 
                                  group = 1),
                    color = "red",
                    size = 1) +
-  scale_y_continuous(sec.axis = sec_axis(~./0.3,
-                                         name = "Population Density")) #adds a second y-axis #need to improve the graph
+  scale_y_continuous(limits = c(0, 7000), 
+                     breaks = c(0, 1000, 2000, 3000, 4000, 5000, 6000, 7000), 
+                     sec.axis = sec_axis(~./0.3, name = "Population Density")) #adds a second y-axis #need to improve the graph
 
 korea_map <- readOGR("C:/Users/Rodrigo/Desktop/TUM/Wintersemester 2021/Data Analysis and Visualization in R/Case Study/data/KOR_adm",
         layer = "KOR_adm1") #creating a map to visualize the differences
 korea_map <- fortify(korea_map, region = "NAME_1") #shape file is now a dataframe
+cases_pop_density$province <- gsub("Jeju-do", "Jeju", cases_pop_density$province) #changed the name of province Jeju-do to Jeju, since map uses this name
 korea_map <- cases_pop_density[korea_map, 
                                on = c("province" = "id")]
 
