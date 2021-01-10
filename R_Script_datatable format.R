@@ -13,7 +13,10 @@ library(outliers) #for testing max value in SeoulFloating
 
 #Setting personal working directory with all relevant datasets
 
-setwd("C:/Users/Rodrigo/Desktop/TUM/Wintersemester 2021/Data Analysis and Visualization in R/Case Study/data")
+if (Sys.info()["user"] == "rodrigo") {
+  setwd("C:/Users/Rodrigo/Desktop/TUM/Wintersemester 2021/Data Analysis and Visualization in R/Case Study/data")
+}
+
 
 #Importing alls .csv files into a list
 
