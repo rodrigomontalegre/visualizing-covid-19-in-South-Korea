@@ -119,7 +119,13 @@ map_pop_density <- map1 + geom_polygon(aes(fill = Pop_dens_sq_km)) +
   labs(title = "Population Density in South Korean Provinces", 
        fill = "Population density") +
   scale_fill_viridis(option = "plasma", direction = 1) +
-  geom_path(aes(x = long, y = lat, group = group), color = "black", size = 1) + theme_map()
+  geom_path(aes(x = long, y = lat, group = group), color = "black", size = 1) + 
+  theme(panel.border = element_rect(color = "black", fill = NA, size = 3),
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        plot.background = element_blank(),
+        legend.position = c(.85, .15),
+        axis.ticks = element_blank())
 
 #Second hypothesis: The spread of COVID-19 affected floating population in Seoul
 
