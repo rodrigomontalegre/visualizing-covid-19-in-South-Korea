@@ -10,6 +10,8 @@ library(ggplot2)
 library(rgdal)
 library(viridis) #for map coloring
 library(outliers) #for testing max value in SeoulFloating
+library(ggthemes) # for the theme_map()
+
 
 #Setting personal working directory with all relevant datasets
 
@@ -65,9 +67,6 @@ latest_infections_national <- rbind(latest_infections, latest_total)
 cases_pop_density <- merge(latest_infections, Pop_Density, by.x = "province", by.y = "By administrative divisions", all = FALSE)
 
 
-cases_pop_density[order(-accumulated_sum)] #checking provinces with most cases
-cases_pop_density[order(-Pop_dens_sq_km)] #checking provinces with highest population density
-
 plot_a <- ggplot(cases_pop_density) + #first plot density and cases
   geom_col(aes(x = reorder(province, -accumulated_sum),
                y = accumulated_sum),
@@ -108,13 +107,19 @@ map_cases <- map1 + geom_polygon(aes(fill = accumulated_sum)) +
   labs(title = "Accumulated cases in South Korean Provinces", 
        fill = "Total number of cases") +
   scale_fill_viridis(option = "plasma", direction = 1) +
-  geom_path(aes(x = long, y = lat, group = group), color = "black", size = 1) #outlines provinces
+  geom_path(aes(x = long, y = lat, group = group), color = "black", size = 1) + 
+  theme(panel.border = element_rect(color = "black", fill = NA, size = 3),
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        plot.background = element_blank(),
+        legend.position = c(.85, .15),
+        axis.ticks = element_blank())
 
 map_pop_density <- map1 + geom_polygon(aes(fill = Pop_dens_sq_km)) +
   labs(title = "Population Density in South Korean Provinces", 
        fill = "Population density") +
   scale_fill_viridis(option = "plasma", direction = 1) +
-  geom_path(aes(x = long, y = lat, group = group), color = "black", size = 1) #outlines provinces
+  geom_path(aes(x = long, y = lat, group = group), color = "black", size = 1) + theme_map()
 
 #Second hypothesis: The spread of COVID-19 affected floating population in Seoul
 
