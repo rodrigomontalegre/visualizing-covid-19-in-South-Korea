@@ -13,7 +13,7 @@ library(outliers) #for testing max value in SeoulFloating
 
 #Setting personal working directory with all relevant datasets
 
-if (Sys.info()["user"] == "rodrigo") {
+if (Sys.info()["user"] == "Rodrigo") {
   setwd("C:/Users/Rodrigo/Desktop/TUM/Wintersemester 2021/Data Analysis and Visualization in R/Case Study/data")
 }
 
