@@ -1,0 +1,57 @@
+---
+title: "Group_98_Submission"
+author: "MontAlegre, Saygılı, Wen, Tschersich"
+date: "18 1 2021"
+output: html_document
+---
+```{r, include = FALSE, message = FALSE, warning = FALSE}
+
+library(data.table)
+library(dplyr)
+library(tidyr)
+library(magrittr)
+library(ggplot2)
+library(rgdal)
+library(viridis) #for map coloring
+library(outliers) #for testing max value in SeoulFloating
+
+#Setting personal working directory with all relevant datasets
+
+if (Sys.info()["user"] == "Rodrigo") {
+  setwd("C:/Users/Rodrigo/Desktop/TUM/Wintersemester 2021/Data Analysis and Visualization in R/Case Study/data")
+}
+
+
+#Importing alls .csv files into a list
+
+list_data = list.files(pattern="*.csv")
+my_datatables = lapply(list_data, fread)
+my_datatables
+my_names <- c("case",
+              "patientInfo",
+              "Policy",
+              "Pop_Density",
+              "Region",
+              "SearchTrend",
+              "SeoulFloating",
+              "Time",
+              "TimeAge",
+              "TimeGender",
+              "TimeProvince",
+              "Weather") #Sorted alphabetically
+names(my_datatables) <- my_names
+
+#Mapping list objects to environment
+
+list2env(my_datatables, .GlobalEnv)
+
+```
+
+Our group decided to shift the focus of our case study to take a look at the regional spread of COVID-19, its effect on  Seoul's floating population and patient information.
+
+The first hypothesis is that there is a potential correlation between population density and the number of cases. Since COVID-19 is a virus that spreads due to human interaction in close proximity, it seems plausible that the virus would infect higher amounts of people in regions with a relatively high population density.
+```{r, echo = FALSE, message = FALSE}
+
+
+```
+
