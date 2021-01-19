@@ -11,7 +11,7 @@ library(rgdal)
 library(viridis) #for map coloring
 library(outliers) #for testing max value in SeoulFloating
 library(ggthemes) # for the theme_map()
-
+library(gridExtra)
 
 #Setting personal working directory with all relevant datasets
 
@@ -161,6 +161,8 @@ map_pop_density <- map1 + geom_polygon(aes(fill = Pop_dens_sq_km)) +
         plot.background = element_blank(),
         legend.position = c(.85, .15),
         axis.ticks = element_blank())
+
+grid.arrange(map_cases, map_pop_density, ncol = 2)
 
 #Qqplot to test for Gaussian distribution
 
