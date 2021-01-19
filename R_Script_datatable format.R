@@ -82,28 +82,31 @@ plot_a <- ggplot(cases_pop_density) + #first plot density and cases
   geom_col(aes(x = reorder(province, -accumulated_sum),
                y = accumulated_sum),
            alpha = 0.75,
-           width = 0.7,
+           width = 0.5,
            fill = "dark blue") +
   labs(title = "Population density and COVID-19 cases per province",
        x = "South Korean Province",
-       y = "Number of cases") +
+       y = "Number of cases (blue)") +
   theme(axis.text.x = element_text(angle = 90),
+        panel.border = element_rect(color = "black",
+                                    fill = NA,
+                                    size = 3),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.background = element_blank())
+
 
 plot_cases_popdensity <- plot_a + geom_line(cases_pop_density, 
                                             mapping = aes(x = province,
                                                           y = 0.3*Pop_dens_sq_km,
                                                           group = 1),
-                                            color = "red", 
-                                            size = 1) + 
+                                            color = "dark red", 
+                                            size = 3) + 
   scale_y_continuous(limits = c(0, 7000), 
                      breaks = c(0, 1000, 2000, 3000, 4000, 5000, 6000, 7000), 
-                     sec.axis = sec_axis(~./0.3, name = "Population Density")) #adds a second y-axis #need to improve the graph
+                     sec.axis = sec_axis(~./0.3, name = "Population Density (red)"))
 
-korea_map <- readOGR("C:/Users/Rodrigo/Desktop/TUM/Wintersemester 2021/Data Analysis and Visualization in R/Case Study/data/KOR_adm",
-        layer = "KOR_adm1") #creating a map to visualize the differences. Change this to where the KOR_adm folder is saved and KOR_adm1 should be the shape file for the provinces
+korea_map <- readOGR("C:/Users/Rodrigo/Desktop/TUM/Wintersemester 2021/Data Analysis and Visualization in R/Case Study/data/KOR_adm", layer = "KOR_adm1") #creating a map to visualize the differences. Change this to where the KOR_adm folder is saved and KOR_adm1 should be the shape file for the provinces
 
 korea_map <- fortify(korea_map, 
                      region = "NAME_1") #shape file is now a dataframe
@@ -159,9 +162,23 @@ map_pop_density <- map1 + geom_polygon(aes(fill = Pop_dens_sq_km)) +
         legend.position = c(.85, .15),
         axis.ticks = element_blank())
 
-#Now time to test if the visual correlation is statistically significant and how strong the relationship is
+#Qqplot to test for Gaussian distribution
 
+print(cases_pop_density)
 
+(quantile(cases_pop_density$accumulated_sum, seq(0,1,0.1)))
+
+(ggplot(data = cases_pop_density, aes(sample = accumulated_sum)) + geom_qq() + stat_qq_line())
+
+(ggplot(data = cases_pop_density, aes(sample = Pop_dens_sq_km)) + geom_qq() + stat_qq_line())
+
+(qqnorm(cases_pop_density$accumulated_sum)) ##qqplot indicates non-gaussian distribution
+
+(qqnorm(cases_pop_density$Pop_dens_sq_km)) ##qqplot indicates non-gaussian distribution
+
+#Spearman test for non-gaussian distribution continuous
+
+cor.test(cases_pop_density$Pop_dens_sq_km, cases_pop_density$accumulated_sum, method = "spearman")
 
 #Second hypothesis: The spread of COVID-19 affected floating population in Seoul
 
