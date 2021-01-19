@@ -8,4 +8,5 @@ install.packages("ggplot2")
 install.packages("rgdal")
 install.packages("viridis") #for map coloring
 install.packages("outliers") #for testing max value in SeoulFloating
-install.packages("ggthemes") #for the theme_map() theme 
+install.packages("ggthemes") #for the theme_map() theme
+install.packages("gridExtra")
