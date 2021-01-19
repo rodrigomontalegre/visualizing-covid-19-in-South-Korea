@@ -3,3 +3,119 @@ title: "Group_98_Submission"
 author: "MontAlegre, Saygılı, Wen, Tschersich"
 date: "18 1 2021"
 output: html_document
+
+For our final case study submission, we decided to refocus on answering three hypotheses regarding the correlation between COVID-19 and population density, floating population and the age group of patients.
+
+The first hypothesis is that the amount of confirmed cases is correlated with population density. Intuitively, where there are more people, there is probably a higher amount of confirmed cases. Two types of plots are presented in order to test this hypothesis. The first depicts the population density of provinces in South Korea mapped against the amount of confirmed cases in each province.
+```{r, echo = FALSE, include = FALSE, message = FALSE}
+
+library(data.table)
+library(dplyr)
+library(tidyr)
+library(magrittr)
+library(ggplot2)
+library(rgdal)
+library(viridis) #for map coloring
+library(outliers) #for testing max value in SeoulFloating
+library(ggthemes) # for the theme_map()
+
+
+#Setting personal working directory with all relevant datasets
+
+if (Sys.info()["user"] == "Rodrigo") {
+  setwd("C:/Users/Rodrigo/Desktop/TUM/Wintersemester 2021/Data Analysis and Visualization in R/Case Study/data")
+}
+
+
+#Importing alls .csv files into a list
+
+list_data = list.files(pattern="*.csv")
+my_datatables = lapply(list_data, fread)
+my_datatables
+my_names <- c("case",
+              "patientInfo",
+              "Policy",
+              "Pop_Density",
+              "Region",
+              "SearchTrend",
+              "SeoulFloating",
+              "Time",
+              "TimeAge",
+              "TimeGender",
+              "TimeProvince",
+              "Weather") #Sorted alphabetically
+
+names(my_datatables) <- my_names
+
+#Mapping list objects to environment
+
+list2env(my_datatables, .GlobalEnv)
+
+```
+```{r, echo = FALSE, include = FALSE, message = FALSE}
+
+pop_dens_col_names <- as.character(Pop_Density[1, ]) #formatting the data for population density
+
+names(Pop_Density) <- pop_dens_col_names
+
+Pop_Density[, c("2005", "2010"):= NULL]
+
+Pop_Density <- Pop_Density[2:.N]
+
+Pop_Density[, Pop_dens_sq_km := `2015`][, `2015` := NULL]
+
+infections_by_province <- patientInfo[, .(count = .N), by = c("province",
+                                                             "confirmed_date")][, accumulated_sum := cumsum(count)]
+infections_by_province[, n_infections := count]
+
+latest_infections <- infections_by_province[order(-as.IDate(confirmed_date, 
+                                                             "%Y-%m-%d")), 
+                                             head(.SD, 1), 
+                                             by = province][, c("count",
+                                                                "n_infections") := NULL]
+latest_total <- list(province = "Whole country",
+                  confirmed_date = as.IDate("2020-06-30"),
+                  accumulated_sum = sum(latest_infections$accumulated_sum)) #extra obeservation for country total
+
+latest_infections_national <- rbind(latest_infections, latest_total)
+
+cases_pop_density <- merge(latest_infections, 
+                           Pop_Density, 
+                           by.x = "province", 
+                           by.y = "By administrative divisions", 
+                           all = FALSE)
+
+
+plot_a <- ggplot(cases_pop_density) + #first plot density and cases
+  geom_col(aes(x = reorder(province, -accumulated_sum),
+               y = accumulated_sum),
+           alpha = 0.75,
+           width = 0.5,
+           fill = "dark blue") +
+  labs(title = "Population density and COVID-19 cases per province",
+       x = "South Korean Province",
+       y = "Number of cases (blue)") +
+  theme(axis.text.x = element_text(angle = 90),
+        panel.border = element_rect(color = "black",
+                                    fill = NA,
+                                    size = 3),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank())
+
+
+plot_cases_popdensity <- plot_a + geom_line(cases_pop_density, 
+                                            mapping = aes(x = province,
+                                                          y = 0.3*Pop_dens_sq_km,
+                                                          group = 1),
+                                            color = "dark red", 
+                                            size = 3) + 
+  scale_y_continuous(limits = c(0, 7000), 
+                     breaks = c(0, 1000, 2000, 3000, 4000, 5000, 6000, 7000), 
+                     sec.axis = sec_axis(~./0.3, name = "Population Density (red)"))
+
+```
+```{r, echo = FALSE, message = FALSE, include = TRUE}
+print(plot_cases_popdensity)
+```
+The number of cases are actually highest in the provinces with the lowest population density. Another way to demonstrate this is by creating choropleths of South Korea.
