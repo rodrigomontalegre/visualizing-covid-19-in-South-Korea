@@ -37,6 +37,7 @@ my_names <- c("case",
               "TimeGender",
               "TimeProvince",
               "Weather") #Sorted alphabetically
+
 names(my_datatables) <- my_names
 
 #Mapping list objects to environment
@@ -46,13 +47,19 @@ list2env(my_datatables, .GlobalEnv)
 #First hypothesis: Population density correlates with number of cases
 
 pop_dens_col_names <- as.character(Pop_Density[1, ]) #formatting the data for population density
+
 names(Pop_Density) <- pop_dens_col_names
+
 Pop_Density[, c("2005", "2010"):= NULL]
+
 Pop_Density <- Pop_Density[2:.N]
+
 Pop_Density[, Pop_dens_sq_km := `2015`][, `2015` := NULL]
-infections_by_province <- patientInfo[, .(count = .N),by = c("province",
+
+infections_by_province <- patientInfo[, .(count = .N), by = c("province",
                                                              "confirmed_date")][, accumulated_sum := cumsum(count)]
 infections_by_province[, n_infections := count]
+
 latest_infections <- infections_by_province[order(-as.IDate(confirmed_date, 
                                                              "%Y-%m-%d")), 
                                              head(.SD, 1), 
@@ -60,11 +67,15 @@ latest_infections <- infections_by_province[order(-as.IDate(confirmed_date,
                                                                 "n_infections") := NULL]
 latest_total <- list(province = "Whole country",
                   confirmed_date = as.IDate("2020-06-30"),
-                  accumulated_sum = sum(latest_infections$accumulated_sum)) #extra obersvation for country total
+                  accumulated_sum = sum(latest_infections$accumulated_sum)) #extra obeservation for country total
 
 latest_infections_national <- rbind(latest_infections, latest_total)
 
-cases_pop_density <- merge(latest_infections, Pop_Density, by.x = "province", by.y = "By administrative divisions", all = FALSE)
+cases_pop_density <- merge(latest_infections, 
+                           Pop_Density, 
+                           by.x = "province", 
+                           by.y = "By administrative divisions", 
+                           all = FALSE)
 
 
 plot_a <- ggplot(cases_pop_density) + #first plot density and cases
@@ -81,34 +92,48 @@ plot_a <- ggplot(cases_pop_density) + #first plot density and cases
         panel.grid.minor = element_blank(),
         panel.background = element_blank())
 
-plot_cases_popdensity <- plot_a + geom_line(cases_pop_density, #added line onto bar plot
-                   mapping = aes(x = province,
-                                 y = 0.3*Pop_dens_sq_km,
-                                 group = 1),
-                   color = "red",
-                   size = 1) +
+plot_cases_popdensity <- plot_a + geom_line(cases_pop_density, 
+                                            mapping = aes(x = province,
+                                                          y = 0.3*Pop_dens_sq_km,
+                                                          group = 1),
+                                            color = "red", 
+                                            size = 1) + 
   scale_y_continuous(limits = c(0, 7000), 
                      breaks = c(0, 1000, 2000, 3000, 4000, 5000, 6000, 7000), 
                      sec.axis = sec_axis(~./0.3, name = "Population Density")) #adds a second y-axis #need to improve the graph
 
 korea_map <- readOGR("C:/Users/Rodrigo/Desktop/TUM/Wintersemester 2021/Data Analysis and Visualization in R/Case Study/data/KOR_adm",
-        layer = "KOR_adm1") #creating a map to visualize the differences
-korea_map <- fortify(korea_map, region = "NAME_1") #shape file is now a dataframe
+        layer = "KOR_adm1") #creating a map to visualize the differences. Change this to where the KOR_adm folder is saved and KOR_adm1 should be the shape file for the provinces
+
+korea_map <- fortify(korea_map, 
+                     region = "NAME_1") #shape file is now a dataframe
+
 cases_pop_density$province <- gsub("Jeju-do", "Jeju", cases_pop_density$province) #changed the name of province Jeju-do to Jeju, since map uses this name
+
 korea_map <- cases_pop_density[korea_map, 
                                on = c("province" = "id")]
 
 map1 <- ggplot(data = korea_map, #this is the base for the maps
                aes(x = long,
                    y = lat,
-                   group = group)) + theme_bw() + theme(legend.background = element_rect(fill = "white", color = "black"))
+                   group = group)) + 
+  theme_bw() + #might just remove this theme
+  theme(legend.background = element_rect(fill = "white", 
+                                         color = "black"))
   
 map_cases <- map1 + geom_polygon(aes(fill = accumulated_sum)) +
   labs(title = "Accumulated cases in South Korean Provinces", 
        fill = "Total number of cases") +
-  scale_fill_viridis(option = "plasma", direction = 1) +
-  geom_path(aes(x = long, y = lat, group = group), color = "black", size = 1) + 
-  theme(panel.border = element_rect(color = "black", fill = NA, size = 3),
+  scale_fill_viridis(option = "plasma", 
+                     direction = 1) +
+  geom_path(aes(x = long, 
+                y = lat, 
+                group = group), 
+            color = "black", 
+            size = 1) + 
+  theme(panel.border = element_rect(color = "black", 
+                                    fill = NA, 
+                                    size = 3),
         axis.title = element_blank(),
         axis.text = element_blank(),
         plot.background = element_blank(),
@@ -118,22 +143,36 @@ map_cases <- map1 + geom_polygon(aes(fill = accumulated_sum)) +
 map_pop_density <- map1 + geom_polygon(aes(fill = Pop_dens_sq_km)) +
   labs(title = "Population Density in South Korean Provinces", 
        fill = "Population density") +
-  scale_fill_viridis(option = "plasma", direction = 1) +
-  geom_path(aes(x = long, y = lat, group = group), color = "black", size = 1) + 
-  theme(panel.border = element_rect(color = "black", fill = NA, size = 3),
+  scale_fill_viridis(option = "plasma", 
+                     direction = 1) +
+  geom_path(aes(x = long, 
+                y = lat, 
+                group = group), 
+            color = "black", 
+            size = 1) + 
+  theme(panel.border = element_rect(color = "black", 
+                                    fill = NA, 
+                                    size = 3),
         axis.title = element_blank(),
         axis.text = element_blank(),
         plot.background = element_blank(),
         legend.position = c(.85, .15),
         axis.ticks = element_blank())
 
+#Now time to test if the visual correlation is statistically significant and how strong the relationship is
+
+
+
 #Second hypothesis: The spread of COVID-19 affected floating population in Seoul
 
 SeoulFloating[, mean_fp_num := mean(fp_num), by = date]
 
 summary(SeoulFloating$mean_fp_num) # Max could be an outlier
+
 tail(unique(sort(SeoulFloating$mean_fp_num)))
+
 outlier_test <- grubbs.test(SeoulFloating$mean_fp_num)
+
 print(outlier_test) #H0: The highest value is not an outlier. WIth p < 0.05, we reject H0, meaning the max value is an outlier. 
 
 outlierReplace = function(dataframe, cols, rows, newValue = NA) { #function to remove specified outliers
