@@ -1,13 +1,13 @@
 ---
 output:
+  word_document: default
   pdf_document: default
   html_document: default
 ---
 ---
 title: "Group_98_Submission"
 author: "MontAlegre, Saygılı, Wen, Tschersich"
-date: "18 1 2021"
-output: html_document
+date: "23 1 2021"
 
 For our final case study submission, we decided to refocus on answering three hypotheses regarding the correlation between COVID-19 and population density, floating population and the age group of patients.
 
@@ -125,12 +125,14 @@ plot_cases_popdensity <- plot_a + geom_line(cases_pop_density,
 ```{r, echo = FALSE, message = FALSE, include = TRUE}
 print(plot_a)
 ```
+
 This first plot depicts the number of confirmed cases in each South Korean province. The provinces with the highest amount of confirmed cases are Jeju-do, Gyeongsangnam-do and Gyeongsangbuk-do. Plotting a line chart that depicts the population density of each province results in the following graph.
 ```{r, echo = FALSE, message = FALSE, include = TRUE}
 print(plot_cases_popdensity)
 ```
+
 With this new information, it seems that the provices with high amounts of confirmed cases are actually those with lower population density. Another way to depict this visually is to create two chloropleth, each one also depicted the number of confirmed cases per South Korean province and each province's population density. 
-```{r}
+```{r, echo = FALSE, message = FALSE, include = FALSE}
 korea_map <- readOGR("C:/Users/Rodrigo/Desktop/TUM/Wintersemester 2021/Data Analysis and Visualization in R/Case Study/data/KOR_adm", layer = "KOR_adm1") #creating a map to visualize the differences. Change this to where the KOR_adm folder is saved and KOR_adm1 should be the shape file for the provinces
 
 korea_map <- fortify(korea_map, 
@@ -192,10 +194,10 @@ print(map_pop_density)
 This first visual analysis indicates that populations density and the number of confirmed cases are correlated, albeit negatively. In a second step, we check if the distribution of data is normal or not.
 ```{r, echo = FALSE}
 qqplot1 <- ggplot(data = cases_pop_density, aes(sample = accumulated_sum)) + geom_qq() + stat_qq_line() +
-  labs(title = "QQ-Plot for assessing distribution of cases data")
+  labs(title = "Assessing distribution of cases data")
 
 qqplot2 <- ggplot(data = cases_pop_density, aes(sample = Pop_dens_sq_km)) + geom_qq() + stat_qq_line() +
-  labs(title = "QQ-Plot for assessing distribution of population density")
+  labs(title = "Assessing distribution of population density")
 
 qqplots1and2 <- grid.arrange(qqplot1, qqplot2, ncol = 2)
 ```
