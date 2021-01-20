@@ -84,9 +84,9 @@ plot_a <- ggplot(cases_pop_density) + #first plot density and cases
            alpha = 0.75,
            width = 0.5,
            fill = "dark blue") +
-  labs(title = "Population density and COVID-19 cases per province",
+  labs(title = "Number of confirmed COVID-19 cases per province in South Korea",
        x = "South Korean Province",
-       y = "Number of cases (blue)") +
+       y = "Number of cases") +
   theme(axis.text.x = element_text(angle = 90),
         panel.border = element_rect(color = "black",
                                     fill = NA,
@@ -104,7 +104,10 @@ plot_cases_popdensity <- plot_a + geom_line(cases_pop_density,
                                             size = 3) + 
   scale_y_continuous(limits = c(0, 7000), 
                      breaks = c(0, 1000, 2000, 3000, 4000, 5000, 6000, 7000), 
-                     sec.axis = sec_axis(~./0.3, name = "Population Density (red)"))
+                     sec.axis = sec_axis(~./0.3, name = "Population Density")) +
+  labs("Number of confirmed COVID-19 cases and population density per South Korean province",
+       x = "South Korean province",
+       y = "Number of cases")
 
 korea_map <- readOGR("C:/Users/Rodrigo/Desktop/TUM/Wintersemester 2021/Data Analysis and Visualization in R/Case Study/data/KOR_adm", layer = "KOR_adm1") #creating a map to visualize the differences. Change this to where the KOR_adm folder is saved and KOR_adm1 should be the shape file for the provinces
 
@@ -166,13 +169,13 @@ grid.arrange(map_cases, map_pop_density, ncol = 2)
 
 #Qqplot to test for Gaussian distribution
 
-print(cases_pop_density)
+qqplot1 <- ggplot(data = cases_pop_density, aes(sample = accumulated_sum)) + geom_qq() + stat_qq_line() +
+  labs(title = "QQ-Plot for assessing distribution of cases data")
 
-(quantile(cases_pop_density$accumulated_sum, seq(0,1,0.1)))
+qqplot2 <- ggplot(data = cases_pop_density, aes(sample = Pop_dens_sq_km)) + geom_qq() + stat_qq_line() +
+  labs(title = "QQ-Plot for assessing distribution of population density")
 
-(ggplot(data = cases_pop_density, aes(sample = accumulated_sum)) + geom_qq() + stat_qq_line())
-
-(ggplot(data = cases_pop_density, aes(sample = Pop_dens_sq_km)) + geom_qq() + stat_qq_line())
+qqplots1and2 <- grid.arrange(qqplot1, qqplot2, ncol = 2)
 
 (qqnorm(cases_pop_density$accumulated_sum)) ##qqplot indicates non-gaussian distribution
 
