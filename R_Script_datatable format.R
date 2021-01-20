@@ -225,33 +225,37 @@ infections_seoul <- patientInfo[province == "Seoul",
                                 by = c("confirmed_date")][, accumulated_sum := cumsum(count)]
 is_plot <- ggplot(infections_seoul, aes(x = confirmed_date,
                                         y = accumulated_sum)) +
-  geom_line() + 
-  labs(title = "Total number of cases in Seoul",
+  geom_line(size = 2,
+            color = "black") + 
+  labs(title = "Total number of confirmed cases in Seoul",
        x = "Date",
        y = "Accumulated number of cases") +
-  theme_bw()
+  theme(panel.border = element_rect(color = "black",
+                                    fill = NA,
+                                    size = 3))
 
-#Statistical testing of the relationship
+weather_seoul_2020 <- Weather[date >= "2020-01-01" & date <= "2020-05-31" & province == "Seoul"][, c("date", "avg_temp")] #preparing weather dataset. Rising average temperature could affect floating population average
 
-sf_is <- merge(SeoulFloating, infections_seoul, by.x = "date", by.y = "confirmed_date", all = TRUE)
-sf_is <- sf_is[date >= "2020-01-01" & date <= "2020-05-31"][!duplicated(date)][, c("date",
-                                                                           "mean_fp_num",
-                                                                           "accumulated_sum")]
-lm_cases <- lm(mean_fp_num ~ accumulated_sum, data = sf_is)
-summary(lm_cases) #not statistically significant
-
-weather_seoul_2020 <- Weather[date >= "2020-01-01" & date <= "2020-05-31" & province == "Seoul"][, c("date",
-                                                                                                     "avg_temp")] #preparing weather dataset. Rising average temperature could affect floating population average
-sf_is2 <- merge(sf_is, weather_seoul_2020, by = "date")
-lm_cases_temp <- lm(mean_fp_num ~ accumulated_sum + avg_temp, data = sf_is2)
-summary(lm_cases_temp) #not statistically significant
+avg_temp_2020 <- ggplot(weather_seoul_2020, aes(x = date, y = avg_temp)) +
+  geom_line() + 
+  labs(title = "Daily Average Temperature in Seoul",
+       x = "Date",
+       y = "Average Temperature") +
+  theme(panel.border = element_rect(color = "black",
+                                    fill = NA,
+                                    size = 3))
 
 #Third hypothesis: Age groups are affected by different infection durations (Kedi)
 
 patientInfo[, age := as.numeric(gsub("s", "", age))][,lengthcovid := (released_date - confirmed_date)] #What about deceased date? OR operator possible?
+
 patientInfo$age <- as.factor(patientInfo$age)
-mean_length <-patientInfo[, .(mean_length = mean(lengthcovid, na.rm = TRUE)), by = age][order(age)]
+
+mean_length <-patientInfo[, .(mean_length = mean(lengthcovid, na.rm = TRUE)), 
+                          by = age][order(age)]
+
 mean_length <- mean_length[age != 100]
+
 mean_length$age <- as.factor(mean_length$age)
 
 plot_b <- ggplot(patientInfo,
@@ -265,44 +269,5 @@ plot_b <- ggplot(patientInfo,
 
 #patientInfo dataset
 
-
-
 infections_by_province <- patientInfo[, .(count = .N),by = c("province", "confirmed_date")][, accumulated_sum := cumsum(count)]
 infections_by_province[, n_infections := count]
-
-
-#policy dataset
-
-policy_type <- Policy[, .(count = .N), by = type] %>% arrange(desc(count))
-
-#time dataset
-
-time_cumsum <- Time[, `:=`(cummulative = cumsum(test), negative_cummulative = cumsum(negative), confirmed_cummulative = cumsum(confirmed), released_cummulative = cumsum(released), deceased_cummulative = cumsum(deceased)), by = date]
-
-time_cumsum <- select(time_cumsum, c(date, cummulative, negative_cummulative, confirmed_cummulative, released_cummulative, deceased_cummulative))
-
-#weather dataset, first two are not correct. Not sure why
-weather_2020 <- Weather[filter(date > "2020-01-01")]
-
-avg_temp_2020 <- weather_2020[, `:=`(average_temp = mean(avg_temp)), by = date]
-
-weather_2020 <- Weather %>%
-  filter(date > "2020-01-01")
-
-avg_temp_2020 <- Weather %>%
-  filter(date > "2020-01-01")%>%
-  group_by(date)%>%
-  summarize(average_temp = mean(avg_temp))
-
-#Some plots
-
-plot_infections_cumsum <- ggplot(infections_by_province, aes(x = confirmed_date, y = cumsum, color = province)) + geom_line() + ggtitle("Accumulative number of cases in provinces over time")
-plot_infections_daily <- ggplot(infections_by_province, aes(x = confirmed_date, y = n_infections, color = province)) + geom_line() + labs(x = "Confirmed date of infection", y = "Number of daily infections") + theme(legend.position = "bottom") + ggtitle("Number of infections per day in South Korean provinces")
-introduction_policy_time <- ggplot(policy, aes(x = start_date, y = type, color = type)) + geom_point(size = 2) + ggtitle("Introduction of policy over time") + labs(x = "Date policy was introduced", y = "Type of policy") + theme(legend.position = "bottom")
-plot_weather_time <- ggplot(avg_temp_2020, aes(x = date, y = average_temp)) + geom_line() + labs(title = "Average temperature in Korea in 2020", x = "Date", y = "Average temperature")
-length_covid_by_age <- ggplot(patientInfo, aes(age, lengthcovid, color=age)) + geom_point() + labs(title = "Duration of COVID-19 infections in days by age group", x = "Age", y = "Duration in days") + scale_x_continuous(breaks = c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100))
-avg_length_covid_by_age <- ggplot(mean_length, aes(age, mean_length, color= age )) + geom_point() + labs(title = "Average duration of COVID-19 infection by age group", x = "Age", y = "Average duration in number of days") + scale_x_continuous(breaks = c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100))
-
-
-multi_plot_1 <- plot_grid(plot_infections_daily, introduction_policy_time, labels = "AUTO")
-multi_plot_2 <- plot_grid(plot_infections_daily, plot_weather_time, labels = "AUTO")
