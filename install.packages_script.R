@@ -9,4 +9,4 @@ install.packages("rgdal")
 install.packages("viridis") #for map coloring
 install.packages("outliers") #for testing max value in SeoulFloating
 install.packages("ggthemes") #for the theme_map() theme
-install.packages("gridExtra")
+install.packages("gridExtra") #for enabling two plots to be placed next to each other.
