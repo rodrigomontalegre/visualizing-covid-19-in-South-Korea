@@ -1,4 +1,9 @@
 ---
+output:
+  pdf_document: default
+  html_document: default
+---
+---
 title: "Group_98_Submission"
 author: "MontAlegre, Saygılı, Wen, Tschersich"
 date: "18 1 2021"
@@ -145,7 +150,7 @@ map1 <- ggplot(data = korea_map, #this is the base for the maps
                                          color = "black"))
   
 map_cases <- map1 + geom_polygon(aes(fill = accumulated_sum)) +
-  labs(title = "Accumulated cases in South Korean Provinces", 
+  labs(title = "Accumulated cases per Province", 
        fill = "Total number of cases") +
   scale_fill_viridis(option = "plasma", 
                      direction = 1) +
@@ -160,11 +165,10 @@ map_cases <- map1 + geom_polygon(aes(fill = accumulated_sum)) +
         axis.title = element_blank(),
         axis.text = element_blank(),
         plot.background = element_blank(),
-        legend.position = c(.85, .15),
         axis.ticks = element_blank())
 
 map_pop_density <- map1 + geom_polygon(aes(fill = Pop_dens_sq_km)) +
-  labs(title = "Population Density in South Korean Provinces", 
+  labs(title = "Population Density per Province", 
        fill = "Population density") +
   scale_fill_viridis(option = "plasma", 
                      direction = 1) +
@@ -179,11 +183,11 @@ map_pop_density <- map1 + geom_polygon(aes(fill = Pop_dens_sq_km)) +
         axis.title = element_blank(),
         axis.text = element_blank(),
         plot.background = element_blank(),
-        legend.position = c(.85, .15),
         axis.ticks = element_blank())
 ```
 ```{r,echo = FALSE}
-print(grid.arrange(map_cases, map_pop_density, ncol = 2))
+print(map_cases)
+print(map_pop_density)
 ```
 This first visual analysis indicates that populations density and the number of confirmed cases are correlated, albeit negatively. In a second step, we check if the distribution of data is normal or not.
 ```{r, echo = FALSE}
@@ -235,7 +239,7 @@ is_plot <- ggplot(infections_seoul, aes(x = confirmed_date,
   geom_line(size = 2,
             color = "black") + 
   labs(title = "Total number of confirmed cases in Seoul",
-       x = "Date",
+       x = "Month",
        y = "Accumulated number of cases") +
   theme(panel.border = element_rect(color = "black",
                                     fill = NA,
@@ -259,3 +263,4 @@ avg_temp_2020 <- ggplot(weather_seoul_2020, aes(x = date, y = avg_temp)) +
 print(avg_temp_2020)
 ```
 
+The final hypothesis is that different age groups are affected by different infection duration.
