@@ -224,5 +224,38 @@ fp_plot <- ggplot(SeoulFloating, aes(x = date,
 ```{r, echo = FALSE, message = FALSE, include = TRUE}
 print(fp_plot)
 ```
-As we can see, there seems to be a natural increase and decrease of the floating population over time. However, there seems to be a possible outlier occuring in the second half of February. There are also strong decreases in the second half of January, in the first half of March and the beginning of May.
+As shown here, the floating population seems to naturally descrease and increase in the short time periods. However, there seems to be a possible outlier occuring in the second half of February. There are also strong decreases in the second half of January, in the first half of March and the beginning of May. Plotting the general trend shows us that there is overall a decreasing trend. Whereas the overall trend was slightly above 27500 in January, this number drops to under 27500 by the end of May.
+At the same time, the total number of confirmed COVID-19 cases rose over time, as depicted in the following graph.
+```{r, echo = FALSE, message = FALSE, include = TRUE}
+infections_seoul <- patientInfo[province == "Seoul",
+                                .(count = .N), 
+                                by = c("confirmed_date")][, accumulated_sum := cumsum(count)]
+is_plot <- ggplot(infections_seoul, aes(x = confirmed_date,
+                                        y = accumulated_sum)) +
+  geom_line(size = 2,
+            color = "black") + 
+  labs(title = "Total number of confirmed cases in Seoul",
+       x = "Date",
+       y = "Accumulated number of cases") +
+  theme(panel.border = element_rect(color = "black",
+                                    fill = NA,
+                                    size = 3))
+print(is_plot)
+```
+The increasing amount of confirmed cases may be correlated with the slight decreasing trend of the floating population. However, during the same period, the average temperature in Seoul rose.
+```{r, echo = FALSE, message = FALSE, include = FALSE}
+weather_seoul_2020 <- Weather[date >= "2020-01-01" & date <= "2020-05-31" & province == "Seoul"][, c("date", "avg_temp")] #preparing weather dataset. Rising average temperature could affect floating population average
+
+avg_temp_2020 <- ggplot(weather_seoul_2020, aes(x = date, y = avg_temp)) +
+  geom_line() + 
+  labs(title = "Daily Average Temperature in Seoul",
+       x = "Date",
+       y = "Average Temperature") +
+  theme(panel.border = element_rect(color = "black",
+                                    fill = NA,
+                                    size = 3))
+```
+```{r, echo = FALSE, message = FALSE, include = TRUE}
+print(avg_temp_2020)
+```
 
