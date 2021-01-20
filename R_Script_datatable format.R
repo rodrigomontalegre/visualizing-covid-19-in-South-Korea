@@ -19,7 +19,6 @@ if (Sys.info()["user"] == "Rodrigo") {
   setwd("C:/Users/Rodrigo/Desktop/TUM/Wintersemester 2021/Data Analysis and Visualization in R/Case Study/data")
 }
 
-
 #Importing alls .csv files into a list
 
 list_data = list.files(pattern="*.csv")
@@ -214,8 +213,12 @@ fp_plot <- ggplot(SeoulFloating, aes(x = date,
   scale_x_date(date_breaks = "1 month",
                date_labels = "%B",
                limits = as.Date(c("2020-01-01", "2020-05-31"))) +
-  theme_bw() +
-  geom_smooth()
+  theme(panel.border = element_rect(color = "black", 
+                                    fill = NA, 
+                                    size = 3)) +
+  geom_smooth(method = "lm",
+              size = 1) +
+  scale_y_continuous(breaks = seq(0, 60000, by = 2500))
 
 infections_seoul <- patientInfo[province == "Seoul",
                                 .(count = .N), 
