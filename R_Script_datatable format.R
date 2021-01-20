@@ -127,7 +127,7 @@ map1 <- ggplot(data = korea_map, #this is the base for the maps
                                          color = "black"))
   
 map_cases <- map1 + geom_polygon(aes(fill = accumulated_sum)) +
-  labs(title = "Accumulated cases in South Korean Provinces", 
+  labs(title = "Accumulated cases per Province", 
        fill = "Total number of cases") +
   scale_fill_viridis(option = "plasma", 
                      direction = 1) +
@@ -142,11 +142,10 @@ map_cases <- map1 + geom_polygon(aes(fill = accumulated_sum)) +
         axis.title = element_blank(),
         axis.text = element_blank(),
         plot.background = element_blank(),
-        legend.position = c(.85, .15),
         axis.ticks = element_blank())
 
 map_pop_density <- map1 + geom_polygon(aes(fill = Pop_dens_sq_km)) +
-  labs(title = "Population Density in South Korean Provinces", 
+  labs(title = "Population Density per Province", 
        fill = "Population density") +
   scale_fill_viridis(option = "plasma", 
                      direction = 1) +
@@ -161,10 +160,8 @@ map_pop_density <- map1 + geom_polygon(aes(fill = Pop_dens_sq_km)) +
         axis.title = element_blank(),
         axis.text = element_blank(),
         plot.background = element_blank(),
-        legend.position = c(.85, .15),
         axis.ticks = element_blank())
 
-grid.arrange(map_cases, map_pop_density, ncol = 2)
 
 #Qqplot to test for Gaussian distribution
 
@@ -228,7 +225,7 @@ is_plot <- ggplot(infections_seoul, aes(x = confirmed_date,
   geom_line(size = 2,
             color = "black") + 
   labs(title = "Total number of confirmed cases in Seoul",
-       x = "Date",
+       x = "Month",
        y = "Accumulated number of cases") +
   theme(panel.border = element_rect(color = "black",
                                     fill = NA,
@@ -258,7 +255,7 @@ mean_length <- mean_length[age != 100]
 
 mean_length$age <- as.factor(mean_length$age)
 
-plot_b <- ggplot(patientInfo,
+plot_c <- ggplot(patientInfo,
                  aes(x = age,
                      y = lengthcovid)) +
   geom_boxplot() +
