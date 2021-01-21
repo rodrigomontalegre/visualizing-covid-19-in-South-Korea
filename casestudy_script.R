@@ -244,27 +244,49 @@ avg_temp_2020 <- ggplot(weather_seoul_2020, aes(x = date, y = avg_temp)) +
 
 #Third hypothesis: Age groups are affected by different infection durations (Kedi)
 
-patientInfo[, age := as.numeric(gsub("s", "", age))][,lengthcovid := (released_date - confirmed_date)] #What about deceased date? OR operator possible?
-
+patientInfo[, age := as.numeric(gsub("s", "", age))][,lengthcovid := (released_date - confirmed_date)]
+                               
 patientInfo$age <- as.factor(patientInfo$age)
 
-mean_length <-patientInfo[, .(mean_length = mean(lengthcovid, na.rm = TRUE)), 
-                          by = age][order(age)]
+mean_length <-patientInfo[, .(mean_length = mean(lengthcovid, na.rm = TRUE)), by = age][order(age)]
 
-mean_length <- mean_length[age != 100]
+mean_length <- mean_length[age %in% c(0, 
+                                      10, 
+                                      20, 
+                                      30, 
+                                      40, 
+                                      50, 
+                                      60, 
+                                      70, 
+                                      80, 
+                                      90, 
+                                      100)]
 
 mean_length$age <- as.factor(mean_length$age)
 
-plot_c <- ggplot(patientInfo,
+patientInfo_2 <- patientInfo[complete.cases(patientInfo[, 3])] #without NAs in age column.
+
+patientInfo_2$age <- recode(patientInfo_2$age, 
+                            "0" = "0 - 9", 
+                            "10" = "10 - 19", 
+                            "20" = "20 - 29", 
+                            "30" = "30 - 39", 
+                            "40" = "40 - 49", 
+                            "50" = "50 - 59", 
+                            "60" = "60 - 69", 
+                            "70" = "70 - 79", 
+                            "80" = "80 - 89", 
+                            "90" = "90 - 99", 
+                            "100" = "100 - 109")
+
+plot_c <- ggplot(patientInfo_2,
                  aes(x = age,
                      y = lengthcovid)) +
   geom_boxplot() +
   labs(title = "Average length of COVID-19 infection by age group",
        x = "Age group",
        y = "Amount of time in days") +
-  theme_bw()
-
-#patientInfo dataset
-
-infections_by_province <- patientInfo[, .(count = .N),by = c("province", "confirmed_date")][, accumulated_sum := cumsum(count)]
-infections_by_province[, n_infections := count]
+  theme(panel.border = element_rect(color = "black", 
+                                    fill = NA, 
+                                    size = 3),
+        panel.background = element_blank())
