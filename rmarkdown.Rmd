@@ -167,7 +167,8 @@ map_cases <- map1 + geom_polygon(aes(fill = accumulated_sum)) +
         axis.title = element_blank(),
         axis.text = element_blank(),
         plot.background = element_blank(),
-        axis.ticks = element_blank())
+        axis.ticks = element_blank(),
+        legend.position = c(0.85, 0.25))
 
 map_pop_density <- map1 + geom_polygon(aes(fill = Pop_dens_sq_km)) +
   labs(title = "Population Density per Province", 
@@ -185,7 +186,8 @@ map_pop_density <- map1 + geom_polygon(aes(fill = Pop_dens_sq_km)) +
         axis.title = element_blank(),
         axis.text = element_blank(),
         plot.background = element_blank(),
-        axis.ticks = element_blank())
+        axis.ticks = element_blank(),
+        legend.position = c(0.85, 0.25))
 ```
 ```{r,echo = FALSE}
 print(map_cases)
@@ -259,10 +261,47 @@ avg_temp_2020 <- ggplot(weather_seoul_2020, aes(x = date, y = avg_temp)) +
        y = "Average Temperature") +
   theme(panel.border = element_rect(color = "black",
                                     fill = NA,
-                                    size = 3))
+                                    size = 3) +
+        panel.background = element_blank())
 ```
 ```{r, echo = FALSE, message = FALSE, include = TRUE}
 print(avg_temp_2020)
 ```
 
-The final hypothesis is that different age groups are affected by different infection duration.
+The final hypothesis is that different age groups are affected by different infection durations. We used the patient information dataset to calculate an average duration per age group, which in our case is defined as the release date - confirmed date. After cleaning the dataset and disregarding patients of unknown ages, we can plot the following graph.
+```{r, echo = FALSE, message = FALSE, include = FALSE}
+patientInfo[, age := as.numeric(gsub("s", "", age))][,lengthcovid := (released_date - confirmed_date)]
+                               
+patientInfo$age <- as.factor(patientInfo$age)
+
+patientInfo_2 <- patientInfo[complete.cases(patientInfo[, 3])] #without NAs in age column.
+
+patientInfo_2$age <- recode(patientInfo_2$age, 
+                            "0" = "0 - 9", 
+                            "10" = "10 - 19", 
+                            "20" = "20 - 29", 
+                            "30" = "30 - 39", 
+                            "40" = "40 - 49", 
+                            "50" = "50 - 59", 
+                            "60" = "60 - 69", 
+                            "70" = "70 - 79", 
+                            "80" = "80 - 89", 
+                            "90" = "90 - 99", 
+                            "100" = "100 - 109")
+```
+```{r, echo = FALSE, message = FALSE, include = TRUE}
+plot_c <- ggplot(patientInfo_2,
+                 aes(x = age,
+                     y = lengthcovid)) +
+  geom_boxplot() +
+  labs(title = "Average length of COVID-19 infection by age group",
+       x = "Age group",
+       y = "Amount of time in days") +
+  theme(panel.border = element_rect(color = "black", 
+                                    fill = NA, 
+                                    size = 3),
+        panel.background = element_blank())
+
+print(plot_c)
+```
+A first look at this boxplot indicates that the median between age groups up to "50 - 59" is roughly the same and that this median increases for older age groups. Thus, it seems that patients 60 and over might experience a longer infection duration. The next step is to determine whe
