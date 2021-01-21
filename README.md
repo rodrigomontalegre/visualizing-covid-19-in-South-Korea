@@ -1,12 +1,25 @@
 # Visualizing COVID 19 Data in South Korea
 
 ## Project description
-This case study is part of the university course "Data Visualization and Analysis in R". The goal of the case study is to indentify interesting relationships in the data, formulate hypotheses and to test these. The case study focuses on COVID-19 cases in South Korea from January 2020 to July 2020. The datasets were provided to us students. However, we were allowed to add additional data if needed to pursure a deeper or more specific analysis. The datasets made available to us contained cases numbers, anonymised patient information, information on policy, regions, search trends, floating  and weather. Each group was made up of four university students.
+This case study is part of the university course "Data Visualization and Analysis in R". The goal of the case study is to indentify interesting relationships in the data, formulate hypotheses and to test these. The case study focuses on COVID-19 cases in South Korea from January 2020 to July 2020. The datasets were provided to us students. However, we were allowed to add additional data if needed to pursure a deeper or more specific analysis. The datasets made available to us contained cases numbers, anonymised patient information, information on policy, regions, search trends, floating  and weather.
+
+The hypotheses we focused on were
+
+1) Population density and the number of confirmed COVID-19 cases are correlated.
+2) The average floating population and the number of confirmed COVID-19 cases are correlated.
+3) Different age groups were affected by different infection lengths.
 
 #### -- Project status [active]
 
+## Project files
+
+* casestudy_script. -- The script written to organize the data, produce visualization and test the hypotehsis.
+* install.packages_script. -- This script installs all the packages needed  for the libraries used in the casestudy_script.
+* rmarkdown -- The R Markdown file used to organize our findings.
+
 ### Methods used
 
+* Data Wrangling
 * Data Visualization
 * Inferential Statistics
 
@@ -17,18 +30,12 @@ This case study is part of the university course "Data Visualization and Analysi
 ## Needs of this project
 - data cleaning
 - data exploration
+- statistical testing
 - reporting
 
 ## Featured Notebooks and Analyses
 
-*To be added once the project is finished
-
-## Contributing Members
-|Name     |
-|---------|
-|[Rodrigo Mont'Alegre](https://github.com/[rodrigomontalegre])|
-|[Kader Saygılı](https://github.com/[kadersaygili])|
-|[Yuping Wen](https://github.com/[ettaetta])|
+*rmarkdown
 
 ## Important considerations for the final analysis
 
