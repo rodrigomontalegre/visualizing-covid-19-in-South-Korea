@@ -1,8 +1,6 @@
 ---
 output:
   word_document: default
-  pdf_document: default
-  html_document: default
 ---
 ---
 title: "Group_98_Submission"
@@ -23,7 +21,7 @@ library(rgdal)
 library(viridis) #for map coloring
 library(outliers) #for testing max value in SeoulFloating
 library(ggthemes) # for the theme_map()
-library(gridExtra)
+library(broom)
 
 #Setting personal working directory with all relevant datasets
 
@@ -96,7 +94,7 @@ plot_a <- ggplot(cases_pop_density) + #first plot density and cases
            alpha = 0.75,
            width = 0.5,
            fill = "dark blue") +
-  labs(title = "Number of confirmed COVID-19 cases per province in South Korea",
+  labs(title = "Number of Confirmed COVID-19 Cases per Province",
        x = "South Korean Province",
        y = "Number of cases") +
   theme(axis.text.x = element_text(angle = 90),
@@ -105,7 +103,8 @@ plot_a <- ggplot(cases_pop_density) + #first plot density and cases
                                     size = 3),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        panel.background = element_blank())
+        panel.background = element_blank(),
+        plot.title = element_text(size = 15))
 
 
 plot_cases_popdensity <- plot_a + geom_line(cases_pop_density, 
@@ -117,9 +116,10 @@ plot_cases_popdensity <- plot_a + geom_line(cases_pop_density,
   scale_y_continuous(limits = c(0, 7000), 
                      breaks = c(0, 1000, 2000, 3000, 4000, 5000, 6000, 7000), 
                      sec.axis = sec_axis(~./0.3, name = "Population Density")) +
-  labs("Number of confirmed COVID-19 cases and population density per South Korean province",
+  labs(title = "Number of confirmed COVID-19 cases versus population density",
        x = "South Korean province",
-       y = "Number of cases")
+       y = "Number of cases") +
+  theme(plot.title = element_text(size = 12))
 
 ```
 ```{r, echo = FALSE, message = FALSE, include = TRUE}
@@ -132,11 +132,11 @@ print(plot_cases_popdensity)
 ```
 
 With this new information, it seems that the provices with high amounts of confirmed cases are actually those with lower population density. Another way to depict this visually is to create two chloropleth, each one also depicted the number of confirmed cases per South Korean province and each province's population density. 
-```{r, echo = FALSE, message = FALSE, include = FALSE}
-korea_map <- readOGR("C:/Users/Rodrigo/Desktop/TUM/Wintersemester 2021/Data Analysis and Visualization in R/Case Study/data/KOR_adm", layer = "KOR_adm1") #creating a map to visualize the differences. Change this to where the KOR_adm folder is saved and KOR_adm1 should be the shape file for the provinces
+```{r, echo = FALSE, message = FALSE, include = TRUE}
+korea_map <- readOGR("C:/Users/Rodrigo/Desktop/TUM/Wintersemester 2021/Data Analysis and Visualization in R/Case Study/data/KOR_adm", layer = "KOR_adm1") 
 
 korea_map <- fortify(korea_map, 
-                     region = "NAME_1") #shape file is now a dataframe
+                     region = "NAME_1")
 
 cases_pop_density$province <- gsub("Jeju-do", "Jeju", cases_pop_density$province) #changed the name of province Jeju-do to Jeju, since map uses this name
 
@@ -147,7 +147,6 @@ map1 <- ggplot(data = korea_map, #this is the base for the maps
                aes(x = long,
                    y = lat,
                    group = group)) + 
-  theme_bw() + #might just remove this theme
   theme(legend.background = element_rect(fill = "white", 
                                          color = "black"))
   
@@ -168,7 +167,12 @@ map_cases <- map1 + geom_polygon(aes(fill = accumulated_sum)) +
         axis.text = element_blank(),
         plot.background = element_blank(),
         axis.ticks = element_blank(),
-        legend.position = c(0.85, 0.25))
+        legend.position = c(0.85, 0.25),
+        legend.title = element_text(size = 7),
+        legend.text = element_text(size = 7),
+        legend.key.size = unit(0.7, "lines")) +
+  guides(shape = guide_legend(override.aes = list(size = 1.5)),
+         color = guide_legend(override.aes = list(size = 1.5)))
 
 map_pop_density <- map1 + geom_polygon(aes(fill = Pop_dens_sq_km)) +
   labs(title = "Population Density per Province", 
@@ -187,7 +191,12 @@ map_pop_density <- map1 + geom_polygon(aes(fill = Pop_dens_sq_km)) +
         axis.text = element_blank(),
         plot.background = element_blank(),
         axis.ticks = element_blank(),
-        legend.position = c(0.85, 0.25))
+        legend.position = c(0.85, 0.25),
+        legend.title = element_text(size = 7),
+        legend.text = element_text(size = 7),
+        legend.key.size = unit(0.7, "lines")) +
+  guides(shape = guide_legend(override.aes = list(size = 1.5)),
+         color = guide_legend(override.aes = list(size = 1.5)))
 ```
 ```{r,echo = FALSE}
 print(map_cases)
@@ -196,16 +205,20 @@ print(map_pop_density)
 This first visual analysis indicates that populations density and the number of confirmed cases are correlated, albeit negatively. In a second step, we check if the distribution of data is normal or not.
 ```{r, echo = FALSE}
 qqplot1 <- ggplot(data = cases_pop_density, aes(sample = accumulated_sum)) + geom_qq() + stat_qq_line() +
-  labs(title = "Assessing distribution of cases data")
+  labs(title = "Q-Q PLot (Cases data)")
 
 qqplot2 <- ggplot(data = cases_pop_density, aes(sample = Pop_dens_sq_km)) + geom_qq() + stat_qq_line() +
-  labs(title = "Assessing distribution of population density")
+  labs(title = "Q-Q PLot (Population density)")
 
-qqplots1and2 <- grid.arrange(qqplot1, qqplot2, ncol = 2)
+print(qqplot1)
+
+print(qqplot2)
 ```
 Since we cannot assume that both variables are normally distributed, we use a spearman's coefficent test to analyze whether the relationship is negatively correlated, to what degree, and if it is statistically signifiacant.
 ```{r, echo = FALSE}
-cor.test(cases_pop_density$Pop_dens_sq_km, cases_pop_density$accumulated_sum, method = "spearman")
+result1 <- cor.test(cases_pop_density$Pop_dens_sq_km, cases_pop_density$accumulated_sum, method = "spearman")
+
+tidy(result1)
 ```
 Running the spearman's test we get a correlation coefficient of -0.785 and a p-value of 0.0005, meaning that the effect is strong, negative and statistically significant.
 
@@ -261,11 +274,16 @@ avg_temp_2020 <- ggplot(weather_seoul_2020, aes(x = date, y = avg_temp)) +
        y = "Average Temperature") +
   theme(panel.border = element_rect(color = "black",
                                     fill = NA,
-                                    size = 3) +
+                                    size = 3),
         panel.background = element_blank())
 ```
 ```{r, echo = FALSE, message = FALSE, include = TRUE}
 print(avg_temp_2020)
+```
+We can test if both variables have an effect on the floating population by using multiple regression analysis.
+
+```{r}
+
 ```
 
 The final hypothesis is that different age groups are affected by different infection durations. We used the patient information dataset to calculate an average duration per age group, which in our case is defined as the release date - confirmed date. After cleaning the dataset and disregarding patients of unknown ages, we can plot the following graph.
@@ -274,9 +292,9 @@ patientInfo[, age := as.numeric(gsub("s", "", age))][,lengthcovid := (released_d
                                
 patientInfo$age <- as.factor(patientInfo$age)
 
-patientInfo_2 <- patientInfo[complete.cases(patientInfo[, 3])] #without NAs in age column.
+patientInfo_age_factor <- patientInfo[complete.cases(patientInfo[, 3])] #without NAs in age column.
 
-patientInfo_2$age <- recode(patientInfo_2$age, 
+patientInfo_age_factor$age <- recode(patientInfo_age_factor$age, 
                             "0" = "0 - 9", 
                             "10" = "10 - 19", 
                             "20" = "20 - 29", 
@@ -290,7 +308,7 @@ patientInfo_2$age <- recode(patientInfo_2$age,
                             "100" = "100 - 109")
 ```
 ```{r, echo = FALSE, message = FALSE, include = TRUE}
-plot_c <- ggplot(patientInfo_2,
+plot_c <- ggplot(patientInfo_age_factor,
                  aes(x = age,
                      y = lengthcovid)) +
   geom_boxplot() +
@@ -304,4 +322,33 @@ plot_c <- ggplot(patientInfo_2,
 
 print(plot_c)
 ```
-A first look at this boxplot indicates that the median between age groups up to "50 - 59" is roughly the same and that this median increases for older age groups. Thus, it seems that patients 60 and over might experience a longer infection duration. The next step is to determine whe
+A first look at this boxplot indicates that the median between age groups up to "50 - 59" is roughly the same and that this median increases for older age groups. Thus, it seems that patients 60 and over might experience a longer infection duration. The next step is to determine whether the distribution is normal and then the appropriate statistical test.
+
+The following qqplots indicate that the distribution of the data is not normal.
+```{r, echo = FALSE, message = FALSE, include = TRUE}
+patientInfo_age_numeric <- patientInfo[, age := as.numeric(gsub("s", "", age))][,lengthcovid := (released_date - confirmed_date)]
+
+patientInfo_age_numeric$age <- as.numeric(patientInfo_age_numeric$age) #for plotting a histogram
+
+qqplot3 <- ggplot(data = patientInfo_age_numeric, aes(sample = lengthcovid)) + 
+  geom_qq() + 
+  stat_qq_line() +
+  labs(title = "QQ-Plot (duration of infection)")
+
+qqplot4 <- ggplot(data = patientInfo_age_numeric, aes(sample = age)) + 
+  geom_qq() + 
+  stat_qq_line() +
+  labs(title = "QQ-Plot (age)")
+
+print(qqplot3)
+
+print(qqplot4)
+
+```
+
+```{r, echo = TRUE, include = TRUE, message = FALSE}
+lm1 <- lm(lengthcovid ~ age, data = patientInfo_age_numeric)
+
+summary(lm1)
+```
+The linear regression model suggests that while the effect of age on the duration of infection is statistically signifacant, its effect is very small and it does not explain the variance in the model.
