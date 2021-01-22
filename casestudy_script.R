@@ -11,7 +11,8 @@ library(rgdal)
 library(viridis) #for map coloring
 library(outliers) #for testing max value in SeoulFloating
 library(ggthemes) # for the theme_map()
-library(gridExtra)
+library(broom)
+
 
 #Setting personal working directory with all relevant datasets
 
@@ -21,7 +22,7 @@ if (Sys.info()["user"] == "Rodrigo") {
 
 #Importing alls .csv files into a list
 
-list_data = list.files(pattern="*.csv")
+list_data = list.files(pattern = "*.csv")
 my_datatables = lapply(list_data, fread)
 my_datatables
 my_names <- c("case",
@@ -190,11 +191,14 @@ qqplots1and2 <- grid.arrange(qqplot1, qqplot2, ncol = 2)
 
 #Spearman test for non-gaussian distribution continuous
 
-cor.test(cases_pop_density$Pop_dens_sq_km, cases_pop_density$accumulated_sum, method = "spearman")
+result1 <- cor.test(cases_pop_density$Pop_dens_sq_km, cases_pop_density$accumulated_sum, method = "spearman")
 
+result1 <- tidy(result1)
+stargazer(result1)
+?stargazer
 #Second hypothesis: The spread of COVID-19 affected floating population in Seoul
 
-SeoulFloating[, mean_fp_num := mean(fp_num), by = date]
+mean_SeoulFloating <- SeoulFloating[, mean_fp_num := mean(fp_num), by = date]
 
 summary(SeoulFloating$mean_fp_num) # Max could be an outlier
 
@@ -203,14 +207,6 @@ tail(unique(sort(SeoulFloating$mean_fp_num)))
 outlier_test <- grubbs.test(SeoulFloating$mean_fp_num)
 
 print(outlier_test) #H0: The highest value is not an outlier. WIth p < 0.05, we reject H0, meaning the max value is an outlier. 
-
-outlierReplace = function(dataframe, cols, rows, newValue = NA) { #function to remove specified outliers
-  if(any(rows)) {
-    set(dataframe, rows, cols, newValue)
-  }
-}
-
-outlierReplace(SeoulFloating, "mean_fp_num", which(SeoulFloating$mean_fp_num > 51000), NA) #might decide to keep the outlier
 
 fp_plot <- ggplot(SeoulFloating, aes(x = date,
                                           y = mean_fp_num)) +
@@ -244,14 +240,44 @@ is_plot <- ggplot(infections_seoul, aes(x = confirmed_date,
 
 weather_seoul_2020 <- Weather[date >= "2020-01-01" & date <= "2020-05-31" & province == "Seoul"][, c("date", "avg_temp")] #preparing weather dataset. Rising average temperature could affect floating population average
 
-avg_temp_2020 <- ggplot(weather_seoul_2020, aes(x = date, y = avg_temp)) +
+avg_temp_2020 <- ggplot(weather_seoul_2020, 
+                        aes(x = date, 
+                            y = avg_temp
+                            )) +
   geom_line() + 
   labs(title = "Daily Average Temperature in Seoul",
        x = "Date",
-       y = "Average Temperature") +
+       y = "Average Temperature"
+       ) +
   theme(panel.border = element_rect(color = "black",
                                     fill = NA,
                                     size = 3))
+
+#linear regression to test if the two variables have an effect
+
+SeoulFloating <- merge(SeoulFloating, 
+                       infections_seoul, 
+                       by.x = "date", 
+                       by.y = "confirmed_date", 
+                       all = TRUE
+                       )
+
+SeoulFloating <- merge(SeoulFloating, 
+                       weather_seoul_2020, 
+                       by.x = "date", 
+                       by.y = "date", 
+                       all = FALSE
+                       )
+
+lm1 <- lm(mean_fp_num ~ accumulated_sum, 
+          data = SeoulFloating
+          )
+
+lm2 <- lm(mean_fp_num ~ accumulated_sum + avg_temp,
+          data = SeoulFloating
+          )
+
+
 
 #Third hypothesis: Age groups are affected by different infection durations (Kedi)
 
@@ -325,6 +351,5 @@ qqplot4 <- ggplot(data = patientInfo_age_numeric, aes(sample = age)) +
 
 cor.test(patientInfo_age_numeric$lengthcovid, patientInfo_age_numeric$age, method = "spearman") #probably not necessary.
 
-lm1 <- lm(lengthcovid ~ age, data = patientInfo_age_numeric)
+lm3 <- lm(lengthcovid ~ age, data = patientInfo_age_numeric)
 
-summary(lm1)
