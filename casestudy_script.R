@@ -122,7 +122,6 @@ map1 <- ggplot(data = korea_map, #this is the base for the maps
                aes(x = long,
                    y = lat,
                    group = group)) + 
-  theme_bw() + #might just remove this theme
   theme(legend.background = element_rect(fill = "white", 
                                          color = "black"))
   
@@ -142,7 +141,13 @@ map_cases <- map1 + geom_polygon(aes(fill = accumulated_sum)) +
         axis.title = element_blank(),
         axis.text = element_blank(),
         plot.background = element_blank(),
-        axis.ticks = element_blank())
+        axis.ticks = element_blank(),
+        legend.position = c(0.85, 0.25),
+        legend.title = element_text(size = 7),
+        legend.text = element_text(size = 7),
+        legend.key.size = unit(0.7, "lines")) +
+  guides(shape = guide_legend(override.aes = list(size = 1.5)),
+         color = guide_legend(override.aes = list(size = 1.5)))
 
 map_pop_density <- map1 + geom_polygon(aes(fill = Pop_dens_sq_km)) +
   labs(title = "Population Density per Province", 
@@ -160,16 +165,22 @@ map_pop_density <- map1 + geom_polygon(aes(fill = Pop_dens_sq_km)) +
         axis.title = element_blank(),
         axis.text = element_blank(),
         plot.background = element_blank(),
-        axis.ticks = element_blank())
+        axis.ticks = element_blank(),
+        legend.position = c(0.85, 0.25),
+        legend.title = element_text(size = 7),
+        legend.text = element_text(size = 7),
+        legend.key.size = unit(0.7, "lines")) +
+  guides(shape = guide_legend(override.aes = list(size = 1.5)),
+         color = guide_legend(override.aes = list(size = 1.5)))
 
 
 #Qqplot to test for Gaussian distribution
 
 qqplot1 <- ggplot(data = cases_pop_density, aes(sample = accumulated_sum)) + geom_qq() + stat_qq_line() +
-  labs(title = "QQ-Plot for assessing distribution of cases data")
+  labs(title = "QQ-Plot (Cases Data)")
 
 qqplot2 <- ggplot(data = cases_pop_density, aes(sample = Pop_dens_sq_km)) + geom_qq() + stat_qq_line() +
-  labs(title = "QQ-Plot for assessing distribution of population density")
+  labs(title = "QQ-Plot (Population Density)")
 
 qqplots1and2 <- grid.arrange(qqplot1, qqplot2, ncol = 2)
 
@@ -264,9 +275,9 @@ mean_length <- mean_length[age %in% c(0,
 
 mean_length$age <- as.factor(mean_length$age)
 
-patientInfo_2 <- patientInfo[complete.cases(patientInfo[, 3])] #without NAs in age column.
+patientInfo_age_factor <- patientInfo[complete.cases(patientInfo[, 3])] #without NAs in age column.
 
-patientInfo_2$age <- recode(patientInfo_2$age, 
+patientInfo_age_factor$age <- recode(patientInfo_2$age, 
                             "0" = "0 - 9", 
                             "10" = "10 - 19", 
                             "20" = "20 - 29", 
@@ -279,7 +290,12 @@ patientInfo_2$age <- recode(patientInfo_2$age,
                             "90" = "90 - 99", 
                             "100" = "100 - 109")
 
-plot_c <- ggplot(patientInfo_2,
+patientInfo_age_numeric <- patientInfo[, age := as.numeric(gsub("s", "", age))][,lengthcovid := (released_date - confirmed_date)]
+
+patientInfo_age_numeric$age <- as.numeric(patientInfo_age_numeric$age) #for plotting a histogram
+
+
+plot_c <- ggplot(patientInfo_age_factor,
                  aes(x = age,
                      y = lengthcovid)) +
   geom_boxplot() +
@@ -290,3 +306,25 @@ plot_c <- ggplot(patientInfo_2,
                                     fill = NA, 
                                     size = 3),
         panel.background = element_blank())
+
+histogram_d <- ggplot(patientInfo_age_numeric, aes(x = lengthcovid)) +
+  geom_histogram()
+
+histogram_e <- ggplot(patientInfo_age_numeric, aes(x = age)) +
+  geom_histogram(bins = 11)
+
+qqplot3 <- ggplot(data = patientInfo_age_numeric, aes(sample = lengthcovid)) + 
+  geom_qq() + 
+  stat_qq_line() +
+  labs(title = "QQ-Plot (infection duration)")
+
+qqplot4 <- ggplot(data = patientInfo_age_numeric, aes(sample = age)) + 
+  geom_qq() + 
+  stat_qq_line() +
+  labs(title = "QQ-Plot (age)")
+
+cor.test(patientInfo_age_numeric$lengthcovid, patientInfo_age_numeric$age, method = "spearman") #probably not necessary.
+
+lm1 <- lm(lengthcovid ~ age, data = patientInfo_age_numeric)
+
+summary(lm1)
