@@ -194,9 +194,12 @@ qqplots1and2 <- grid.arrange(qqplot1, qqplot2, ncol = 2)
 result1 <- cor.test(cases_pop_density$Pop_dens_sq_km, cases_pop_density$accumulated_sum, method = "spearman")
 
 result1 <- tidy(result1)
-stargazer(result1)
-?stargazer
+
+
+
 #Second hypothesis: The spread of COVID-19 affected floating population in Seoul
+
+
 
 mean_SeoulFloating <- SeoulFloating[, mean_fp_num := mean(fp_num), by = date]
 
@@ -226,7 +229,8 @@ fp_plot <- ggplot(SeoulFloating, aes(x = date,
 
 infections_seoul <- patientInfo[province == "Seoul",
                                 .(count = .N), 
-                                by = c("confirmed_date")][, accumulated_sum := cumsum(count)]
+                                by = c("confirmed_date")][, accumulated_sum := cumsum(count)][confirmed_date <= "2020-05-31"]
+
 is_plot <- ggplot(infections_seoul, aes(x = confirmed_date,
                                         y = accumulated_sum)) +
   geom_line(size = 2,
@@ -237,6 +241,18 @@ is_plot <- ggplot(infections_seoul, aes(x = confirmed_date,
   theme(panel.border = element_rect(color = "black",
                                     fill = NA,
                                     size = 3))
+
+dc_plot <- ggplot(infections_seoul,aes(x = confirmed_date,
+                                       y = count)) +
+  geom_line(size = 1,
+            color = "black") + 
+  labs(title = "Daily number of confirmed cases in Seoul",
+       x = "Date",
+       y = "Number of cases per day") +
+  theme(panel.border = element_rect(color = "black",
+                                    fill = NA,
+                                    size = 3))
+
 
 weather_seoul_2020 <- Weather[date >= "2020-01-01" & date <= "2020-05-31" & province == "Seoul"][, c("date", "avg_temp")] #preparing weather dataset. Rising average temperature could affect floating population average
 
@@ -269,15 +285,13 @@ SeoulFloating <- merge(SeoulFloating,
                        all = FALSE
                        )
 
-lm1 <- lm(mean_fp_num ~ accumulated_sum, 
-          data = SeoulFloating
-          )
+lm1 <- lm(mean_fp_num ~ count, 
+          data = SeoulFloating)
 
 lm2 <- lm(mean_fp_num ~ accumulated_sum + avg_temp,
-          data = SeoulFloating
-          )
+          data = SeoulFloating)
 
-
+summary(lm1)
 
 #Third hypothesis: Age groups are affected by different infection durations (Kedi)
 
