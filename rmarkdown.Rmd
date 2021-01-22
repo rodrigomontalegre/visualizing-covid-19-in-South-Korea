@@ -1,6 +1,7 @@
 ---
 output:
   word_document: default
+  df_print: paged
 ---
 ---
 title: "Group_98_Submission"
@@ -104,7 +105,7 @@ plot_a <- ggplot(cases_pop_density) + #first plot density and cases
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.background = element_blank(),
-        plot.title = element_text(size = 15))
+        plot.title = element_text(size = 12))
 
 
 plot_cases_popdensity <- plot_a + geom_line(cases_pop_density, 
@@ -222,9 +223,10 @@ tidy(result1)
 ```
 Running the spearman's test we get a correlation coefficient of -0.785 and a p-value of 0.0005, meaning that the effect is strong, negative and statistically significant.
 
-The second hypothesis is that the amount of confirmed cases in Seoul affected the city's floating population. Intuitively, as the amount of confirmed cases rises, the government implements policies and awareness increases through media reporting, we should expect some type of decrease in the amount of people moving throughout the city. The following plot depicts the average floating population in Seoul per day and the overall trend.
+The second hypothesis is that the amount of confirmed cases per day in Seoul affected the city's floating population. 
 ```{r, echo = FALSE, message = FALSE, include = FALSE}
 SeoulFloating[, mean_fp_num := mean(fp_num), by = date]
+
 
 fp_plot <- ggplot(SeoulFloating, aes(x = date,
                                           y = mean_fp_num)) +
@@ -241,29 +243,33 @@ fp_plot <- ggplot(SeoulFloating, aes(x = date,
   geom_smooth(method = "lm",
               size = 1) +
   scale_y_continuous(breaks = seq(0, 60000, by = 2500))
+
 ```
 ```{r, echo = FALSE, message = FALSE, include = TRUE}
 print(fp_plot)
 ```
-As shown here, the floating population seems to naturally descrease and increase in the short time periods. However, there seems to be a possible outlier occuring in the second half of February. There are also strong decreases in the second half of January, in the first half of March and the beginning of May. Plotting the general trend shows us that there is overall a decreasing trend. Whereas the overall trend was slightly above 27500 in January, this number drops to under 27500 by the end of May.
-At the same time, the total number of confirmed COVID-19 cases rose over time, as depicted in the following graph.
+As shown here, the floating population seems to naturally descrease and increase in the short time periods. However, there seems to be a possible outlier occuring in the second half of February. There are also strong decreases in the second half of January, in the first half of March and the beginning of May. Plotting the general trend shows us that there is overall a decreasing trend. Whereas the average floating population was slightly above 27500 in January, this number drops to under 27500 by the end of May.
+
+At the same time, the daily number of confirmed cases also experienced waves. The first seems to have been between Marcha nd mid April and the second between mid May to July.
 ```{r, echo = FALSE, message = FALSE, include = TRUE}
 infections_seoul <- patientInfo[province == "Seoul",
                                 .(count = .N), 
-                                by = c("confirmed_date")][, accumulated_sum := cumsum(count)]
-is_plot <- ggplot(infections_seoul, aes(x = confirmed_date,
-                                        y = accumulated_sum)) +
-  geom_line(size = 2,
+                                by = c("confirmed_date")][, accumulated_sum := cumsum(count)][confirmed_date <= "2020-05-31"]
+
+dc_plot <- ggplot(infections_seoul,aes(x = confirmed_date,
+                                       y = count)) +
+  geom_line(size = 1,
             color = "black") + 
-  labs(title = "Total number of confirmed cases in Seoul",
-       x = "Month",
-       y = "Accumulated number of cases") +
+  labs(title = "Daily number of confirmed cases in Seoul",
+       x = "Date",
+       y = "Number of cases per day") +
   theme(panel.border = element_rect(color = "black",
                                     fill = NA,
-                                    size = 3))
-print(is_plot)
+                                    size = 3),
+        panel.background = element_blank())
+print(dc_plot)
 ```
-The increasing amount of confirmed cases may be correlated with the slight decreasing trend of the floating population. However, during the same period, the average temperature in Seoul rose.
+The spikes of daily confirmed cases may be correlated with the drops in the floating population average and may also correlate with the overall negative trend. However, during the same period, the average temperature in Seoul rose. This third variable may also correlate with the average floating population.
 ```{r, echo = FALSE, message = FALSE, include = FALSE}
 weather_seoul_2020 <- Weather[date >= "2020-01-01" & date <= "2020-05-31" & province == "Seoul"][, c("date", "avg_temp")] #preparing weather dataset. Rising average temperature could affect floating population average
 
@@ -282,9 +288,36 @@ print(avg_temp_2020)
 ```
 We can test if both variables have an effect on the floating population by using multiple regression analysis.
 
-```{r}
+```{r, echo = FALSE, message = FALSE, include = TRUE}
 
+SeoulFloating <- merge(SeoulFloating, 
+                       infections_seoul, 
+                       by.x = "date", 
+                       by.y = "confirmed_date", 
+                       all = TRUE
+                       )
+
+SeoulFloating <- merge(SeoulFloating, 
+                       weather_seoul_2020, 
+                       by.x = "date", 
+                       by.y = "date", 
+                       all = FALSE
+                       )
+
+lm1 <- lm(mean_fp_num ~ count, 
+          data = SeoulFloating)
+
+lm2 <- lm(mean_fp_num ~ count + avg_temp,
+          data = SeoulFloating)
+
+lm1 <- tidy(lm1)
+lm2 <- tidy(lm2)
+
+print(lm1)
+print(lm2)
 ```
+As shown in the first table, the daily count of cases in Seoul has negative effect on the average floating population and the effect is statistically significant. Once we perform a multiple regression analysis including average daily temperature, the effect of the daily count diminishes. Both are statistically significant.
+
 
 The final hypothesis is that different age groups are affected by different infection durations. We used the patient information dataset to calculate an average duration per age group, which in our case is defined as the release date - confirmed date. After cleaning the dataset and disregarding patients of unknown ages, we can plot the following graph.
 ```{r, echo = FALSE, message = FALSE, include = FALSE}
@@ -347,8 +380,10 @@ print(qqplot4)
 ```
 
 ```{r, echo = TRUE, include = TRUE, message = FALSE}
-lm1 <- lm(lengthcovid ~ age, data = patientInfo_age_numeric)
+lm3 <- lm(lengthcovid ~ age, data = patientInfo_age_numeric)
 
-summary(lm1)
+lm3 <- tidy(lm3)
+
+print(lm3)
 ```
 The linear regression model suggests that while the effect of age on the duration of infection is statistically signifacant, its effect is very small and it does not explain the variance in the model.
