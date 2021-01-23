@@ -13,7 +13,6 @@ library(outliers) #for testing max value in SeoulFloating
 library(ggthemes) # for the theme_map()
 library(broom)
 
-
 #Setting personal working directory with all relevant datasets
 
 if (Sys.info()["user"] == "Rodrigo") {
@@ -285,7 +284,7 @@ SeoulFloating <- merge(SeoulFloating,
                        all = FALSE
                        )
 
-lm1 <- lm(mean_fp_num ~ count, 
+lm1 <- lm(mean_fp_num ~ daily_count, 
           data = SeoulFloating)
 
 lm2 <- lm(mean_fp_num ~ accumulated_sum + avg_temp,
@@ -363,7 +362,8 @@ qqplot4 <- ggplot(data = patientInfo_age_numeric, aes(sample = age)) +
   stat_qq_line() +
   labs(title = "QQ-Plot (age)")
 
-cor.test(patientInfo_age_numeric$lengthcovid, patientInfo_age_numeric$age, method = "spearman") #probably not necessary.
+cor.test(patientInfo_age_numeric$lengthcovid, patientInfo_age_numeric$age, method = "spearman", exact = FALSE) #probably not necessary.
+
+is.factor(patientInfo_age_factor$age)
 
 lm3 <- lm(lengthcovid ~ age, data = patientInfo_age_numeric)
-
