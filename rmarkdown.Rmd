@@ -98,7 +98,7 @@ plot_a <- ggplot(cases_pop_density) + #first plot density and cases
            fill = "dark blue") +
   labs(title = "Number of Confirmed COVID-19 Cases per Province",
        x = "South Korean Province",
-       y = "Number of cases") +
+       y = "Number of Cases") +
   theme(axis.text.x = element_text(angle = 90),
         panel.border = element_rect(color = "black",
                                     fill = NA,
@@ -118,9 +118,9 @@ plot_cases_popdensity <- plot_a + geom_line(cases_pop_density,
   scale_y_continuous(limits = c(0, 7000), 
                      breaks = c(0, 1000, 2000, 3000, 4000, 5000, 6000, 7000), 
                      sec.axis = sec_axis(~./0.3, name = "Population Density")) +
-  labs(title = "Total confirmed cases versus population density",
-       x = "South Korean province",
-       y = "Number of cases") +
+  labs(title = "Total Confirmed Cases Versus Population Density",
+       x = "South Korean Province",
+       y = "Number of Cases") +
   theme(plot.title = element_text(size = 12))
 
 ```
@@ -153,8 +153,8 @@ map1 <- ggplot(data = korea_map, #this is the base for the maps
                                          color = "black"))
   
 map_cases <- map1 + geom_polygon(aes(fill = accumulated_sum)) +
-  labs(title = "Accumulated cases per Province", 
-       fill = "Total number of cases") +
+  labs(title = "Accumulated Cases per Province", 
+       fill = "Total Number of Cases") +
   scale_fill_viridis(option = "plasma", 
                      direction = 1) +
   geom_path(aes(x = long, 
@@ -224,17 +224,20 @@ result1 <- cor.test(cases_pop_density$Pop_dens_sq_km, cases_pop_density$accumula
 
 tidy(result1)
 ```
-Running the spearman's test we get a correlation coefficient of -0.785 and a p-value of 0.0005, meaning that the effect is strong, negative and statistically significant.
+Running the spearman's test we get a correlation coefficient of -0.785 and a p-value of 0.0005, meaning that the correaltion is strong, negative and statistically significant.
 
-The second hypothesis is that the amount of confirmed cases per day in Seoul affected the city's floating population. 
+The second hypothesis is that the amount of confirmed cases per day in Seoul correlates with changes in the city's floating population. 
 ```{r, echo = FALSE, message = FALSE, include = FALSE}
+Sys.setlocale("LC_ALL", "English")
+
+
 SeoulFloating[, mean_fp_num := mean(fp_num), by = date]
 
 
 fp_plot <- ggplot(SeoulFloating, aes(x = date,
                                           y = mean_fp_num)) +
   geom_line() +
-  labs(title = "Average Floating Population in Seoul over time",
+  labs(title = "Average Floating Population in Seoul Over Time",
        x = "Date",
        y = "Floating Population Average") +
   scale_x_date(date_breaks = "1 month",
@@ -263,9 +266,9 @@ dc_plot <- ggplot(infections_seoul,aes(x = confirmed_date,
                                        y = count)) +
   geom_line(size = 1,
             color = "black") + 
-  labs(title = "Daily number of confirmed cases in Seoul",
+  labs(title = "Daily Number of Confirmed Cases in Seoul",
        x = "Date",
-       y = "Number of cases per day") +
+       y = "Number of Cases per Day") +
   theme(panel.border = element_rect(color = "black",
                                     fill = NA,
                                     size = 3))
@@ -327,7 +330,7 @@ print(lm1)
 print(lm2)
 ```
 
-As shown in the first table, the daily count of cases in Seoul has a negative effect on the average floating population and the effect is statistically significant. Once we perform an analysis including average daily temperature, the effect of the daily count diminishes slightly. Both are statistically significant.
+As shown in the first table, the daily count of cases in Seoul correlates negatively with the average floating population and the relationship is statistically significant. Once we perform an analysis including average daily temperature, the effect of the daily count diminishes slightly. Both are statistically significant.
 
 
 The final hypothesis is that different age groups are affected by different infection durations. We used the patient information dataset to calculate an average duration per age group, which in our case is defined as the release date minus the confirmed date. After cleaning the dataset and disregarding patients of unknown ages, we can plot the following graph.
@@ -356,20 +359,20 @@ plot_c <- ggplot(patientInfo_age_factor,
                  aes(x = age,
                      y = lengthcovid)) +
   geom_boxplot() +
-  labs(title = "Average length of COVID-19 infection by age group",
-       x = "Age group",
-       y = "Amount of time in days") +
+  labs(title = "Average Length of COVID-19 Infection by Age Group",
+       x = "Age Group",
+       y = "Amount of Time in Days") +
   theme(panel.border = element_rect(color = "black", 
                                     fill = NA, 
                                     size = 3),
         panel.background = element_blank())
 
-print(plot_c)
+print(plot_c) 
 ```
 A first look at this boxplot indicates that the median between age groups up to "50 - 59" is roughly the same and that this median increases for older age groups. Thus, it seems that patients 60 and over might experience a longer infection duration. The next step is to determine whether our data follows a gaussian distribution and then the appropriate statistical test.
 
 The following qqplots indicate that the distribution of the data is not normal.
-```{r, echo = TRUE, message = FALSE, include = TRUE}
+```{r, echo = FALSE, message = FALSE, include = TRUE}
 patientInfo_age_numeric <- patientInfo[, age := as.numeric(gsub("s", "", age))][,lengthcovid := (released_date - confirmed_date)]
 
 patientInfo_age_numeric$age <- as.numeric(patientInfo_age_numeric$age) #for plotting a histogram
@@ -377,12 +380,12 @@ patientInfo_age_numeric$age <- as.numeric(patientInfo_age_numeric$age) #for plot
 qqplot3 <- ggplot(data = patientInfo_age_numeric, aes(sample = lengthcovid)) + 
   geom_qq() + 
   stat_qq_line() +
-  labs(title = "QQ-Plot (duration of infection)")
+  labs(title = "QQ-Plot (Duration of Infection)")
 
 qqplot4 <- ggplot(data = patientInfo_age_numeric, aes(sample = age)) + 
   geom_qq() + 
   stat_qq_line() +
-  labs(title = "QQ-Plot (age)")
+  labs(title = "QQ-Plot (Age)")
 
 print(qqplot3)
 
@@ -391,11 +394,11 @@ print(qqplot4)
 ```
 
 ```{r, echo = FALSE, include = TRUE, message = FALSE}
-lm3 <- lm(lengthcovid ~ age, data = patientInfo_age_numeric)
 
-lm3 <- tidy(lm3)
 
-print(lm3)
+table2 <- cor.test(patientInfo_age_numeric$lengthcovid, patientInfo_age_numeric$age, method = "spearman", exact = FALSE)
+
+tidy(table2)
 
 ```
-The linear regression model suggests that while the effect of age on the duration of infection is statistically significant, its effect is very small and it does not explain a significant amount of variance in the model (multiple R-squared = 0.0365, adjusted R-squared = 0.036).
+The spearman method indicates that there is a slightly positive relationship between the two variables and that it is statistically significant.
