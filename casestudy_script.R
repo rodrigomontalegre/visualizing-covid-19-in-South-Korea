@@ -55,22 +55,13 @@ Pop_Density <- Pop_Density[2:.N]
 
 Pop_Density[, Pop_dens_sq_km := `2015`][, `2015` := NULL]
 
-infections_by_province <- patientInfo[, .(count = .N), by = c("province",
-                                                             "confirmed_date")][, accumulated_sum := cumsum(count)]
-infections_by_province[, n_infections := count]
+cases_by_province <- unique(case[, c("case_id", 
+                                     "province", 
+                                     "confirmed")][, "sum" := sum(confirmed), 
+                                                   by = province], 
+                            by = "province")
 
-latest_infections <- infections_by_province[order(-as.IDate(confirmed_date, 
-                                                             "%Y-%m-%d")), 
-                                             head(.SD, 1), 
-                                             by = province][, c("count",
-                                                                "n_infections") := NULL]
-latest_total <- list(province = "Whole country",
-                  confirmed_date = as.IDate("2020-06-30"),
-                  accumulated_sum = sum(latest_infections$accumulated_sum)) #extra obeservation for country total
-
-latest_infections_national <- rbind(latest_infections, latest_total)
-
-cases_pop_density <- merge(latest_infections, 
+cases_pop_density <- merge(cases_by_province, 
                            Pop_Density, 
                            by.x = "province", 
                            by.y = "By administrative divisions", 
@@ -78,8 +69,8 @@ cases_pop_density <- merge(latest_infections,
 
 
 plot_a <- ggplot(cases_pop_density) + #first plot density and cases
-  geom_col(aes(x = reorder(province, -accumulated_sum),
-               y = accumulated_sum),
+  geom_col(aes(x = reorder(province, -sum),
+               y = sum),
            alpha = 0.75,
            width = 0.5,
            fill = "dark blue") +
@@ -100,7 +91,7 @@ plot_cases_popdensity <- plot_a + geom_line(cases_pop_density,
                                                           y = 0.3*Pop_dens_sq_km,
                                                           group = 1),
                                             color = "dark red", 
-                                            size = 3) + 
+                                            size = 2) + 
   scale_y_continuous(limits = c(0, 7000), 
                      breaks = c(0, 1000, 2000, 3000, 4000, 5000, 6000, 7000), 
                      sec.axis = sec_axis(~./0.3, name = "Population Density")) +
@@ -125,7 +116,7 @@ map1 <- ggplot(data = korea_map, #this is the base for the maps
   theme(legend.background = element_rect(fill = "white", 
                                          color = "black"))
   
-map_cases <- map1 + geom_polygon(aes(fill = accumulated_sum)) +
+map_cases <- map1 + geom_polygon(aes(fill = sum)) +
   labs(title = "Accumulated cases per Province", 
        fill = "Total number of cases") +
   scale_fill_viridis(option = "plasma", 
